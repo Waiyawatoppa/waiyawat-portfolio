@@ -4,14 +4,14 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 /**
- * Hover fills use the lightest shade of each hue that still clears 4.5:1
- * against white at this text size: pink-600 (4.54:1), purple-600 (5.53:1),
- * sky-700 (5.85:1). The original -500 steps measured 3.6-4.1:1.
+ * Bright fill with dark same-hue text, matching the project badges. Measured:
+ * pink 5.47:1, purple 5.39:1, sky 6.37:1 — all well clear of 4.5:1, at roughly
+ * 72-75% fill lightness instead of the ~50% that white text would require.
  */
 const SECTIONS = [
-  { id: "about", label: "About Me", hover: "hover:bg-pink-600 hover:text-white" },
-  { id: "tech-stack", label: "Tech & Skills", hover: "hover:bg-purple-600 hover:text-white" },
-  { id: "works", label: "Selected Works", hover: "hover:bg-sky-700 hover:text-white" },
+  { id: "about", label: "About Me", hover: "hover:bg-pink-400 hover:text-pink-950" },
+  { id: "tech-stack", label: "Tech & Skills", hover: "hover:bg-purple-400 hover:text-purple-950" },
+  { id: "works", label: "Selected Works", hover: "hover:bg-sky-400 hover:text-sky-950" },
 ];
 
 const SCROLL_THRESHOLD = 300;
@@ -127,7 +127,7 @@ export default function ScrollToTop() {
         onClick={() => (tapOpensMenu ? setOpen(true) : scrollToTop())}
         aria-expanded={showMenu && isTouch ? open : undefined}
         aria-controls={showMenu && isTouch ? "section-shortcuts" : undefined}
-        className="p-4 bg-gray-900 text-white rounded-full shadow-lg hover:bg-sky-600 hover:scale-105 transition-all duration-300 motion-reduce:transition-none motion-reduce:hover:scale-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-700"
+        className="p-4 bg-gray-900 text-white rounded-full shadow-lg hover:bg-sky-400 hover:text-sky-950 hover:scale-105 transition-all duration-300 motion-reduce:transition-none motion-reduce:hover:scale-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-700"
       >
         <svg
           className="w-5 h-5"

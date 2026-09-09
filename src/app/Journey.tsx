@@ -6,10 +6,11 @@ const KIND_LABEL: Record<TimelineKind, string> = {
   award: "Award",
 };
 
+/** Same bright-fill/dark-text treatment as the project badges. */
 const KIND_STYLE: Record<TimelineKind, string> = {
-  education: "bg-sky-100 text-sky-900",
-  experience: "bg-pink-100 text-pink-900",
-  award: "bg-amber-100 text-amber-900",
+  education: "bg-sky-400 text-sky-950",
+  experience: "bg-pink-400 text-pink-950",
+  award: "bg-amber-400 text-amber-950",
 };
 
 /**
@@ -42,7 +43,7 @@ export default function Journey({ entries }: { entries: TimelineEntry[] }) {
             <li key={entry.id} className="relative pl-8 pb-10 last:pb-0">
               <span
                 aria-hidden="true"
-                className="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-white border-2 border-sky-600"
+                className="absolute -left-[9px] top-1.5 w-4 h-4 rounded-full bg-white border-2 border-sky-500"
               />
 
               <div className="flex flex-wrap items-center gap-3 mb-2">

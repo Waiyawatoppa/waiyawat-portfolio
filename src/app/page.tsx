@@ -53,8 +53,8 @@ export default async function Home() {
               positive social impact.
             </p>
             <div className="flex justify-center gap-4" aria-hidden="true">
-              <span className="h-1 w-20 bg-sky-500 rounded-full" />
-              <span className="h-1 w-20 bg-pink-500 rounded-full" />
+              <span className="h-1 w-20 bg-sky-400 rounded-full" />
+              <span className="h-1 w-20 bg-pink-400 rounded-full" />
             </div>
           </div>
         </section>

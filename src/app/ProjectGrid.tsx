@@ -9,20 +9,26 @@ import CoverImage from "./_components/CoverImage";
 const FILTERS = ["All", ...CATEGORIES] as const;
 
 /**
- * Saturated fills with white text, as originally designed. What failed contrast
- * before was the shade, not the saturation: the -500 steps sit around 59-69%
- * oklch lightness and measured 2.6-3.9:1 against white. The -700 steps keep the
- * same hue at full chroma and measure 5.23-5.89:1.
+ * Bright fill with dark same-hue text, rather than white on a mid-tone fill.
+ *
+ * White text forces the fill dark enough to carry it, which caps how bright the
+ * badge can be. Inverting the polarity lifts the fill from ~50% to ~75% oklch
+ * lightness *and* improves contrast at the same time:
+ *
+ *   white on sky-700  #0069a8  50% lightness  5.85:1
+ *   sky-950 on sky-400 #00bcff 75% lightness  6.37:1
+ *
+ * Measured: sky 6.37:1, pink 5.47:1, orange 6.58:1, emerald 7.83:1.
  */
 const CATEGORY_STYLES: Record<string, string> = {
-  "tech + biz": "bg-sky-700",
-  business: "bg-pink-700",
-  "technology & engineering": "bg-orange-700",
-  leader: "bg-emerald-700",
+  "tech + biz": "bg-sky-400 text-sky-950",
+  business: "bg-pink-400 text-pink-950",
+  "technology & engineering": "bg-orange-400 text-orange-950",
+  leader: "bg-emerald-400 text-emerald-950",
 };
 
 function categoryStyle(category: string) {
-  return CATEGORY_STYLES[category?.toLowerCase()] ?? "bg-gray-800";
+  return CATEGORY_STYLES[category?.toLowerCase()] ?? "bg-gray-200 text-gray-900";
 }
 
 export default function ProjectGrid({ projects }: { projects: ProjectCard[] }) {
@@ -83,7 +89,7 @@ export default function ProjectGrid({ projects }: { projects: ProjectCard[] }) {
               <div className="p-10">
                 <div className="flex flex-wrap items-center gap-3 mb-4">
                   <span
-                    className={`text-[10px] font-black text-white px-4 py-1.5 rounded-full tracking-widest uppercase shadow-sm ${categoryStyle(project.category)}`}
+                    className={`text-[10px] font-black px-4 py-1.5 rounded-full tracking-widest uppercase shadow-sm ${categoryStyle(project.category)}`}
                   >
                     {project.category || "Project"}
                   </span>

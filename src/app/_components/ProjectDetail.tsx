@@ -46,7 +46,7 @@ export default function ProjectDetail({
       <article className="max-w-2xl mx-auto px-6 md:px-0 py-12">
         <header className="mb-10 border-b border-gray-200 pb-8">
           <p className="mb-4">
-            <span className="text-[10px] font-bold bg-sky-100 text-sky-900 px-3 py-1 rounded-full uppercase tracking-widest">
+            <span className="text-[10px] font-bold bg-sky-400 text-sky-950 px-3 py-1 rounded-full uppercase tracking-widest">
               {project.category}
             </span>
           </p>
