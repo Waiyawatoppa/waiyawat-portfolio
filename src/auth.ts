@@ -1,5 +1,7 @@
-import NextAuth from "next-auth"
-import Google from "next-auth/providers/google"
+import NextAuth from "next-auth";
+import Google from "next-auth/providers/google";
+
+import { isAdminEmail } from "@/lib/admin-email";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
@@ -9,9 +11,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
-    // เช็คว่าคนที่ Login เข้ามาคือ Admin เท่านั้นหรือไม่
+    /**
+     * Only the configured admin account may complete sign-in. This is a
+     * convenience gate for the UI; every mutation independently re-checks
+     * authorization in `src/app/admin/actions.ts`.
+     */
     async signIn({ user }) {
-      return user.email === process.env.ADMIN_EMAIL;
+      return isAdminEmail(user.email);
     },
   },
-})
+});

@@ -1,62 +1,102 @@
 "use client";
-import { useState, useEffect } from "react";
-import Image from "next/image";
 
-interface AboutSlide {
-  id?: string;
-  image_url: string;
-}
+import { useEffect, useState } from "react";
 
-export default function AboutSlider({ initialSlides }: { initialSlides: AboutSlide[] }) {
+import type { Slide } from "@/lib/types";
+import CoverImage from "./_components/CoverImage";
+
+const INTERVAL_MS = 4000;
+
+export default function AboutSlider({
+  initialSlides,
+}: {
+  initialSlides: Pick<Slide, "id" | "image_url">[];
+}) {
+  const slides = initialSlides ?? [];
   const [currentIndex, setCurrentIndex] = useState(0);
-  
-  // ใช้รูป Default ถ้า Database ว่างเปล่า
-  const slides = initialSlides && initialSlides.length > 0 
-    ? initialSlides 
-    : [{ image_url: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=1200" }];
+  const [paused, setPaused] = useState(false);
+  const [reducedMotion, setReducedMotion] = useState(false);
 
   useEffect(() => {
-    // ถ้ามีรูปเดียว ไม่ต้องรัน Timer เลื่อนสไลด์
-    if (slides.length <= 1) return;
+    const query = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const sync = () => setReducedMotion(query.matches);
+    sync();
+    query.addEventListener("change", sync);
+    return () => query.removeEventListener("change", sync);
+  }, []);
 
+  // Derived rather than corrected in an effect: if the slide list shrinks, a
+  // stale index would otherwise render every slide at opacity-0.
+  const activeIndex = currentIndex >= slides.length ? 0 : currentIndex;
+
+  const autoplay = slides.length > 1 && !paused && !reducedMotion;
+
+  useEffect(() => {
+    if (!autoplay) return;
     const timer = setInterval(() => {
-      setCurrentIndex((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
-    }, 4000);
-
+      setCurrentIndex((prev) => (prev + 1) % slides.length);
+    }, INTERVAL_MS);
     return () => clearInterval(timer);
-  }, [slides.length]);
+  }, [autoplay, slides.length]);
+
+  if (slides.length === 0) {
+    return (
+      <div className="relative w-full aspect-square md:aspect-[4/5] rounded-3xl overflow-hidden shadow-lg bg-gray-100 border border-gray-100">
+        <CoverImage
+          src={null}
+          alt="Portrait placeholder"
+          sizes="(max-width: 768px) 100vw, 50vw"
+        />
+      </div>
+    );
+  }
 
   return (
-    <div className="relative w-full aspect-square md:aspect-[4/5] rounded-3xl overflow-hidden group shadow-lg bg-gray-100 border border-gray-100">
+    <div className="relative w-full aspect-square md:aspect-[4/5] rounded-3xl overflow-hidden shadow-lg bg-gray-100 border border-gray-100">
       {slides.map((slide, index) => (
         <div
-          key={slide.id || index}
-          className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
-            index === currentIndex ? "opacity-100" : "opacity-0"
+          key={slide.id ?? index}
+          aria-hidden={index !== activeIndex}
+          className={`absolute inset-0 transition-opacity duration-1000 ease-in-out motion-reduce:transition-none ${
+            index === activeIndex ? "opacity-100" : "opacity-0"
           }`}
         >
-          <Image
+          <CoverImage
             src={slide.image_url}
-            alt={`About Waiyawat ${index + 1}`}
-            fill
-            className="object-cover"
+            alt={`Waiyawat Aphiraktanon, photo ${index + 1} of ${slides.length}`}
             sizes="(max-width: 768px) 100vw, 50vw"
-            priority={index === 0} // LCP Optimization
+            priority={index === 0}
           />
         </div>
       ))}
 
       {slides.length > 1 && (
-        <div className="absolute bottom-6 left-0 right-0 flex justify-center gap-2 z-10">
-          {slides.map((_, index) => (
+        <div className="absolute bottom-6 left-0 right-0 flex justify-center items-center gap-2 z-10">
+          {slides.map((slide, index) => (
             <button
-              key={index}
+              key={slide.id ?? index}
+              type="button"
               onClick={() => setCurrentIndex(index)}
-              className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                index === currentIndex ? "bg-white w-6" : "bg-white/50 hover:bg-white/80"
+              aria-label={`Show photo ${index + 1} of ${slides.length}`}
+              aria-current={index === activeIndex}
+              className={`h-2 rounded-full transition-all duration-300 motion-reduce:transition-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white ${
+                index === activeIndex
+                  ? "bg-white w-6"
+                  : "bg-white/60 hover:bg-white/90 w-2"
               }`}
             />
           ))}
+
+          {!reducedMotion && (
+            <button
+              type="button"
+              onClick={() => setPaused((prev) => !prev)}
+              aria-label={paused ? "Resume slideshow" : "Pause slideshow"}
+              className="ml-2 rounded-full bg-black/45 text-white text-[0.7rem] font-bold px-2 py-1 hover:bg-black/65 transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            >
+              {paused ? "Play" : "Pause"}
+            </button>
+          )}
         </div>
       )}
     </div>

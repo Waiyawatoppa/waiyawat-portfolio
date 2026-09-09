@@ -1,54 +1,69 @@
-"use client";
+const SKILLS = [
+  "Next.js",
+  "Tailwind CSS",
+  "Microcontroller",
+  "C/C++",
+  "Java",
+  "Business Intelligence",
+  "Python",
+  "Figma",
+  "DaVinci Resolve",
+  "Git",
+];
+
+/**
+ * Server Component: this is a static list animated purely by CSS, so there is
+ * nothing to hydrate. The pause control is a CSS-only checkbox toggle (styled
+ * in globals.css) rather than React state, which keeps it that way while still
+ * providing the stop mechanism WCAG 2.2.2 requires.
+ *
+ * The input, label and .marquee must remain siblings — the pause rules use the
+ * general sibling combinator.
+ */
+function Track({ duplicate = false }: { duplicate?: boolean }) {
+  return (
+    <ul
+      className="flex shrink-0 justify-around min-w-full animate-infinite-scroll list-none p-0"
+      aria-hidden={duplicate}
+    >
+      {SKILLS.map((skill) => (
+        <li key={skill} className="flex items-center gap-6 px-6 md:px-8">
+          <span className="text-sm md:text-base font-bold text-gray-700 uppercase tracking-widest whitespace-nowrap">
+            {skill}
+          </span>
+          <span className="text-sky-400 text-xs" aria-hidden="true">
+            ✦
+          </span>
+        </li>
+      ))}
+    </ul>
+  );
+}
 
 export default function TechStack() {
-  const skills = [
-    "Next.js",
-    "Tailwind CSS",
-    "Microcontroller",
-    "C/C++",
-    "JAVA",
-    "Business Intelligence",
-    "Python",
-    "Figma",
-    "DaVinci Resolve",
-    "Git",
-  ];
-
   return (
-    <div id="tech-stack" className="py-10">
-      <h2 className="text-xs uppercase tracking-[0.3em] font-bold text-gray-300 mb-10 text-center font-sans">
-        Tech Stack And Skills
+    <section
+      id="tech-stack"
+      aria-labelledby="tech-stack-heading"
+      className="py-10 scroll-mt-24"
+    >
+      <h2
+        id="tech-stack-heading"
+        className="text-xs uppercase tracking-[0.3em] font-bold text-gray-700 mb-8 text-center"
+      >
+        Tech Stack and Skills
       </h2>
 
-      <section className="w-full group overflow-hidden bg-white py-10 border-y border-gray-50 flex items-center [mask-image:_linear-gradient(to_right,transparent_0,_black_100px,_black_calc(100%-100px),transparent_100%)]">
-        <div className="flex w-max">
-          
-          {/* กล่อง 1 */}
-          <div className="flex w-1/2 justify-around animate-infinite-scroll">
-            {skills.map((skill, index) => (
-              <div key={index} className="flex items-center space-x-8 px-8">
-                <span className="text-sm md:text-base font-bold text-gray-400 uppercase tracking-widest hover:text-sky-500 transition-colors duration-300 cursor-default font-sans">
-                  {skill}
-                </span>
-                <span className="text-sky-200 text-xs">✦</span>
-              </div>
-            ))}
-          </div>
-          
-          {/* กล่อง 2 */}
-          <div className="flex w-1/2 justify-around animate-infinite-scroll" aria-hidden="true">
-            {skills.map((skill, index) => (
-              <div key={`dup-${index}`} className="flex items-center space-x-8 px-8">
-                <span className="text-sm md:text-base font-bold text-gray-400 uppercase tracking-widest hover:text-sky-500 transition-colors duration-300 cursor-default font-sans">
-                  {skill}
-                </span>
-                <span className="text-sky-200 text-xs">✦</span>
-              </div>
-            ))}
-          </div>
+      <input type="checkbox" id="pause-marquee" className="marquee-pause" />
+      <label htmlFor="pause-marquee" className="marquee-toggle">
+        <span className="marquee-label-pause">Pause animation</span>
+        <span className="marquee-label-resume">Resume animation</span>
+      </label>
 
-        </div>
-      </section>
-    </div>
+      <div className="marquee w-full overflow-hidden bg-white py-8 border-y border-gray-200 flex md:[mask-image:linear-gradient(to_right,transparent_0,black_80px,black_calc(100%-80px),transparent_100%)]">
+        <Track />
+        <Track duplicate />
+      </div>
+    </section>
   );
 }
