@@ -34,8 +34,19 @@ function MailIcon() {
   );
 }
 
+/**
+ * Brand-coloured circle with a white glyph — the look react-social-icons gave
+ * us originally. Drawn inline instead of pulling the library back in, because
+ * the library offered no way to set rel="noopener noreferrer" on its anchor.
+ */
 const SOCIAL_LINK =
-  "w-11 h-11 grid place-items-center rounded-full bg-gray-900 text-white hover:bg-sky-700 transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-700";
+  "w-11 h-11 grid place-items-center rounded-full text-white shadow-sm transition-transform duration-300 hover:scale-110 motion-reduce:transition-none motion-reduce:hover:scale-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-700";
+
+const BRAND = {
+  github: "bg-[#181717]",
+  linkedin: "bg-[#0A66C2]",
+  email: "bg-sky-600",
+} as const;
 
 export default function SiteFooter() {
   return (
@@ -47,7 +58,7 @@ export default function SiteFooter() {
               href={site.github}
               target="_blank"
               rel="noopener noreferrer"
-              className={SOCIAL_LINK}
+              className={`${SOCIAL_LINK} ${BRAND.github}`}
             >
               <GitHubIcon />
               <span className="sr-only">GitHub (opens in a new tab)</span>
@@ -60,7 +71,7 @@ export default function SiteFooter() {
                 href={site.linkedin}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={SOCIAL_LINK}
+                className={`${SOCIAL_LINK} ${BRAND.linkedin}`}
               >
                 <LinkedInIcon />
                 <span className="sr-only">LinkedIn (opens in a new tab)</span>
@@ -69,7 +80,7 @@ export default function SiteFooter() {
           )}
 
           <li>
-            <a href={mailto} className={SOCIAL_LINK}>
+            <a href={mailto} className={`${SOCIAL_LINK} ${BRAND.email}`}>
               <MailIcon />
               <span className="sr-only">Email {site.email}</span>
             </a>
@@ -77,7 +88,7 @@ export default function SiteFooter() {
         </ul>
       </nav>
 
-      <p className="text-gray-700 text-sm">
+      <p className="text-gray-500 text-sm">
         © {new Date().getFullYear()} {site.name}.
       </p>
     </footer>

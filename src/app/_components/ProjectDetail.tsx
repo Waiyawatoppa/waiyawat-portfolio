@@ -46,7 +46,7 @@ export default function ProjectDetail({
       <article className="max-w-2xl mx-auto px-6 md:px-0 py-12">
         <header className="mb-10 border-b border-gray-200 pb-8">
           <p className="mb-4">
-            <span className="text-xs font-bold bg-sky-100 text-sky-900 px-3 py-1 rounded-full uppercase tracking-widest">
+            <span className="text-[10px] font-bold bg-sky-100 text-sky-900 px-3 py-1 rounded-full uppercase tracking-widest">
               {project.category}
             </span>
           </p>
@@ -56,7 +56,7 @@ export default function ProjectDetail({
           >
             {project.title}
           </Heading>
-          <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-gray-700">
+          <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-gray-500">
             {published && (
               <>
                 <time dateTime={published.toISOString()}>
@@ -72,8 +72,8 @@ export default function ProjectDetail({
           </p>
         </header>
 
-        <div className="text-lg text-gray-800 space-y-8 leading-relaxed">
-          <p className="font-semibold text-xl text-gray-900 border-l-4 border-sky-600 pl-6">
+        <div className="font-serif text-lg text-gray-700 space-y-8 leading-relaxed">
+          <p className="font-sans font-semibold text-xl text-gray-900 italic border-l-4 border-gray-200 pl-6">
             {project.description}
           </p>
 
@@ -84,7 +84,7 @@ export default function ProjectDetail({
           </div>
 
           {(github || live || pdf) && (
-            <div className="pt-10 flex flex-wrap items-center gap-4">
+            <div className="pt-10 flex flex-wrap items-center gap-4 font-sans">
               {github && (
                 <a
                   href={github}

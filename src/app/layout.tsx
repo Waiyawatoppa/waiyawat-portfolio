@@ -1,15 +1,21 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Lora } from "next/font/google";
 
 import { site } from "@/lib/site";
 import "./globals.css";
 import ScrollToTop from "./ScrollToTop";
 
-// Lora was loaded on every route to style a single element whose children
-// immediately overrode it back to the sans stack, so it has been removed.
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
+  display: "swap",
+});
+
+// Sets the case-study body on the project detail view. Exposed to Tailwind as
+// the `font-serif` utility via the --font-serif token in globals.css.
+const lora = Lora({
+  subsets: ["latin"],
+  variable: "--font-lora",
   display: "swap",
 });
 
@@ -63,7 +69,7 @@ export default function RootLayout({
   };
 
   return (
-    <html lang="en" className={inter.variable}>
+    <html lang="en" className={`${inter.variable} ${lora.variable}`}>
       <body className={`${inter.className} antialiased`}>
         <script
           type="application/ld+json"

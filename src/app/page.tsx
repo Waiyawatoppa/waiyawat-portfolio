@@ -25,7 +25,7 @@ function navLinks(hasJourney: boolean): NavLink[] {
   ];
 }
 
-const EYEBROW = "text-xs uppercase tracking-[0.3em] font-bold text-gray-700";
+const EYEBROW = "text-xs uppercase tracking-[0.3em] font-bold text-gray-500";
 
 export default async function Home() {
   const [projects, slides, timeline] = await Promise.all([
@@ -43,18 +43,18 @@ export default async function Home() {
           <div className="max-w-6xl mx-auto text-center">
             <h1 className="text-4xl md:text-6xl font-bold mb-6 tracking-tight leading-tight max-w-4xl mx-auto">
               Bridging{" "}
-              <span className="bg-gradient-to-r from-sky-600 to-pink-600 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-sky-600 to-pink-500 bg-clip-text text-transparent font-extrabold">
                 Business Strategy
               </span>{" "}
               with Technology.
             </h1>
-            <p className="text-lg text-gray-700 max-w-2xl mx-auto mb-10 leading-relaxed">
+            <p className="text-lg text-gray-500 max-w-2xl mx-auto mb-10 leading-relaxed">
               {site.name} — {site.role}. Focused on building tech solutions for
               positive social impact.
             </p>
             <div className="flex justify-center gap-4" aria-hidden="true">
-              <span className="h-1 w-20 bg-sky-600 rounded-full" />
-              <span className="h-1 w-20 bg-pink-600 rounded-full" />
+              <span className="h-1 w-20 bg-sky-500 rounded-full" />
+              <span className="h-1 w-20 bg-pink-500 rounded-full" />
             </div>
           </div>
         </section>
@@ -76,11 +76,11 @@ export default async function Home() {
                 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-6 leading-tight"
               >
                 Technology Creating{" "}
-                <span className="text-sky-700">Positive Impact</span> for{" "}
-                <span className="text-pink-700">Business and Society</span>.
+                <span className="text-sky-600">Positive Impact</span> for{" "}
+                <span className="text-pink-600">Business and Society</span>.
               </h2>
 
-              <div className="space-y-5 text-gray-800 leading-relaxed text-base">
+              <div className="space-y-5 text-gray-700 leading-relaxed text-base">
                 <p>
                   Hi, I&rsquo;m{" "}
                   <span className="font-semibold text-gray-900">
@@ -157,7 +157,7 @@ export default async function Home() {
             >
               Let&rsquo;s build something worth building.
             </h2>
-            <p className="text-gray-800 leading-relaxed mb-10">
+            <p className="text-gray-700 leading-relaxed mb-10">
               I&rsquo;m open to internships, collaborations and conversations
               about technology, business and social impact. The fastest way to
               reach me is email.
