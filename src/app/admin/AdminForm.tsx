@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 
 import { CATEGORIES, type Project } from "@/lib/types";
+import MarkdownEditor from "./MarkdownEditor";
 import { createProject, updateProject, type ActionState } from "./actions";
 
 const FIELD =
@@ -91,14 +92,9 @@ export default function AdminForm({
         <label htmlFor="content" className={LABEL}>
           Full Content
         </label>
-        <textarea
-          id="content"
+        <MarkdownEditor
           name="content"
-          defaultValue={initialData?.content}
-          rows={8}
-          required
-          maxLength={50000}
-          className={FIELD}
+          defaultValue={initialData?.content ?? ""}
         />
       </div>
 
@@ -190,6 +186,24 @@ export default function AdminForm({
           {state.message}
         </p>
       )}
+
+      <div className="md:col-span-2 flex items-center gap-3 rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3">
+        <input
+          id="published"
+          type="checkbox"
+          name="published"
+          defaultChecked={initialData?.published ?? true}
+          className="w-4 h-4 accent-sky-600"
+        />
+        <label htmlFor="published" className="text-sm text-gray-800">
+          <span className="font-bold">Published</span>
+          <span className="text-gray-600">
+            {" "}
+            — unchecked keeps it as a draft, hidden from the site, the sitemap
+            and search engines.
+          </span>
+        </label>
+      </div>
 
       <button
         type="submit"

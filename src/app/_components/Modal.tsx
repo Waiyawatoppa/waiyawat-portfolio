@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 
 const FOCUSABLE = [
   "a[href]",
@@ -27,6 +27,7 @@ export default function Modal({
   children: ReactNode;
 }) {
   const router = useRouter();
+  const [expanded, setExpanded] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
   const previouslyFocused = useRef<HTMLElement | null>(null);
 
@@ -89,7 +90,11 @@ export default function Modal({
   }, [close]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 md:p-10">
+    <div
+      className={`fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm ${
+        expanded ? "p-0" : "p-4 md:p-10"
+      }`}
+    >
       <button
         type="button"
         onClick={close}
@@ -104,7 +109,11 @@ export default function Modal({
         aria-modal="true"
         aria-labelledby={titleId}
         tabIndex={-1}
-        className="relative bg-white w-full max-w-4xl max-h-full rounded-3xl shadow-2xl overflow-hidden flex flex-col"
+        className={`relative bg-white w-full shadow-2xl overflow-hidden flex flex-col ${
+          expanded
+            ? "max-w-none h-full rounded-none"
+            : "max-w-4xl max-h-full rounded-3xl"
+        }`}
       >
         <div className="px-6 md:px-8 py-4 border-b border-gray-200 flex justify-between items-center bg-white shrink-0">
           <div className="flex items-center space-x-2" aria-hidden="true">
@@ -112,14 +121,25 @@ export default function Modal({
             <span className="w-3 h-3 rounded-full bg-yellow-400" />
             <span className="w-3 h-3 rounded-full bg-green-400" />
           </div>
-          <button
-            type="button"
-            onClick={close}
-            className="text-gray-700 hover:text-gray-900 transition text-sm font-bold rounded px-2 py-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-700"
-          >
-            Close
-            <span className="sr-only"> dialog (or press Escape)</span>
-          </button>
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={() => setExpanded((prev) => !prev)}
+              aria-pressed={expanded}
+              className="text-gray-700 hover:text-gray-900 transition text-sm font-bold rounded px-2 py-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-700"
+            >
+              {expanded ? "Exit focus" : "Focus"}
+              <span className="sr-only"> mode</span>
+            </button>
+            <button
+              type="button"
+              onClick={close}
+              className="text-gray-700 hover:text-gray-900 transition text-sm font-bold rounded px-2 py-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-700"
+            >
+              Close
+              <span className="sr-only"> dialog (or press Escape)</span>
+            </button>
+          </div>
         </div>
 
         <div className="overflow-y-auto flex-1">{children}</div>

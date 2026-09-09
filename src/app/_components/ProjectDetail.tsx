@@ -1,6 +1,9 @@
+import { extractHeadings, readingTimeMinutes } from "@/lib/markdown";
 import type { Project } from "@/lib/types";
 import { safeExternalUrl } from "@/lib/url";
 import CoverImage from "./CoverImage";
+import Markdown from "./Markdown";
+import ReadingPane from "./ReadingPane";
 
 const LINK_BASE =
   "px-6 py-2 rounded-full text-sm font-bold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-700";
@@ -28,9 +31,10 @@ export default function ProjectDetail({
   const live = safeExternalUrl(project.live_url);
   const pdf = safeExternalUrl(project.pdf_url);
 
-  const published = project.created_at
-    ? new Date(project.created_at)
-    : null;
+  const content = project.content ?? "";
+  const headings = extractHeadings(content);
+  const minutes = readingTimeMinutes(content);
+  const published = project.created_at ? new Date(project.created_at) : null;
 
   return (
     <>
@@ -68,75 +72,85 @@ export default function ProjectDetail({
                 <span aria-hidden="true">•</span>
               </>
             )}
+            <span>{minutes} min read</span>
+            <span aria-hidden="true">•</span>
             <span>Case Study</span>
           </p>
         </header>
 
-        <div className="font-serif text-lg text-gray-700 space-y-8 leading-relaxed">
-          <p className="font-sans font-semibold text-xl text-gray-900 italic border-l-4 border-gray-200 pl-6">
-            {project.description}
-          </p>
+        <ReadingPane headings={headings}>
+          {/* break-words so an unbroken URL in the content cannot push the
+              layout sideways. */}
+          <div className="font-serif text-gray-700 break-words">
+            <p className="font-sans font-semibold text-[1.15em] text-gray-900 italic border-l-4 border-gray-200 pl-6 my-6">
+              {project.description}
+            </p>
 
-          {/* Arbitrary stored text: break long tokens so a pasted URL cannot
-              push the layout sideways. */}
-          <div className="whitespace-pre-wrap break-words leading-loose">
-            {project.content}
+            {content.trim() ? (
+              <Markdown content={content} />
+            ) : (
+              <p className="my-6 text-gray-500 italic">
+                The full write-up for this project is still being written.
+              </p>
+            )}
           </div>
+        </ReadingPane>
 
-          {(github || live || pdf) && (
-            <div className="pt-10 flex flex-wrap items-center gap-4 font-sans">
-              {github && (
-                <a
-                  href={github}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`${LINK_BASE} border border-gray-300 hover:bg-gray-50`}
-                >
-                  GitHub Repository
-                  <span className="sr-only"> (opens in a new tab)</span>
-                </a>
-              )}
+        {/* Outside ReadingPane: these are controls, so they keep a fixed size
+            rather than scaling with the reader's text-size setting. */}
+        {(github || live || pdf) && (
+          <div className="mt-12 pt-8 border-t border-gray-200 flex flex-wrap items-center gap-4 font-sans">
+            {github && (
+              <a
+                href={github}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`${LINK_BASE} border border-gray-300 hover:bg-gray-50`}
+              >
+                GitHub Repository
+                <span className="sr-only"> (opens in a new tab)</span>
+              </a>
+            )}
 
-              {live && (
-                <a
-                  href={live}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`${LINK_BASE} bg-gray-900 text-white hover:bg-gray-800 shadow-lg`}
-                >
-                  Visit Live Site
-                  <span className="sr-only"> (opens in a new tab)</span>
-                </a>
-              )}
+            {live && (
+              <a
+                href={live}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`${LINK_BASE} bg-gray-900 text-white hover:bg-gray-800 shadow-lg`}
+              >
+                Visit Live Site
+                <span className="sr-only"> (opens in a new tab)</span>
+              </a>
+            )}
 
-              {pdf && (
-                <a
-                  href={pdf}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`${LINK_BASE} inline-flex items-center gap-2 bg-white text-gray-900 border-2 border-gray-900 hover:bg-gray-900 hover:text-white`}
+            {pdf && (
+              <a
+                href={pdf}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`${LINK_BASE} inline-flex items-center gap-2 bg-white text-gray-900 border-2 border-gray-900 hover:bg-gray-900 hover:text-white`}
+              >
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
                 >
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    aria-hidden="true"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                    />
-                  </svg>
-                  Read the full document
-                  <span className="sr-only"> (opens in a new tab)</span>
-                </a>
-              )}
-            </div>
-          )}
-        </div>
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  />
+                </svg>
+                Read the full document
+                <span className="sr-only"> (opens in a new tab)</span>
+              </a>
+            )}
+          </div>
+        )}
       </article>
     </>
   );

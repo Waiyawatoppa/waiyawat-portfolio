@@ -23,3 +23,23 @@ export function safeExternalUrl(
     return null;
   }
 }
+
+/**
+ * next/image throws at render time for a host that is not in remotePatterns,
+ * which would turn one bad image URL inside a case study into a broken page.
+ * Markdown images are checked against the same allowlist before rendering.
+ */
+export function isAllowedImageSrc(src: string): boolean {
+  if (!src) return false;
+  if (src.startsWith("/")) return true;
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!supabaseUrl) return false;
+
+  try {
+    const { hostname, protocol } = new URL(src);
+    return protocol === "https:" && hostname === new URL(supabaseUrl).hostname;
+  } catch {
+    return false;
+  }
+}

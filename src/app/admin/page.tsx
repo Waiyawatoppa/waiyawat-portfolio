@@ -4,12 +4,11 @@ import { redirect } from "next/navigation";
 import { auth, signOut } from "@/auth";
 import { isAdmin } from "@/lib/admin";
 import { supabase } from "@/lib/supabase";
-import type { Project, Slide, TimelineEntry } from "@/lib/types";
+import type { Slide, TimelineEntry } from "@/lib/types";
 import AdminForm from "./AdminForm";
-import ConfirmDelete from "./ConfirmDelete";
+import ProjectList, { type ProjectRow } from "./ProjectList";
 import SlideManager from "./SlideManager";
 import TimelineManager from "./TimelineManager";
-import { deleteProject } from "./actions";
 
 export const metadata = { robots: { index: false, follow: false } };
 
@@ -22,7 +21,7 @@ export default async function AdminPage() {
     await Promise.all([
       supabase
         .from("projects")
-        .select("id, title, slug, category")
+        .select("id, title, slug, category, published, created_at")
         .order("created_at", { ascending: false }),
       supabase
         .from("about_slides")
@@ -35,10 +34,7 @@ export default async function AdminPage() {
         .order("created_at", { ascending: false }),
     ]);
 
-  const projectRows = (projects ?? []) as Pick<
-    Project,
-    "id" | "title" | "slug" | "category"
-  >[];
+  const projectRows = (projects ?? []) as ProjectRow[];
 
   return (
     <div className="min-h-dvh bg-gray-50 pt-24 pb-12 px-6">
@@ -88,52 +84,8 @@ export default async function AdminPage() {
           <TimelineManager entries={(timeline ?? []) as TimelineEntry[]} />
         </section>
 
-        <section className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
-          <h2 className="text-xl font-bold mb-6">Existing Projects</h2>
-          <ul className="space-y-4 list-none p-0">
-            {projectRows.map((project) => (
-              <li
-                key={project.id}
-                className="flex flex-wrap items-center justify-between gap-4 p-4 border border-gray-200 rounded-2xl"
-              >
-                <div className="min-w-0">
-                  <p className="font-bold text-gray-900 truncate">
-                    {project.title}
-                  </p>
-                  <p className="text-xs text-gray-600 truncate">
-                    /project/{project.slug}
-                  </p>
-                </div>
+        <ProjectList projects={projectRows} />
 
-                <div className="flex items-center gap-4">
-                  <span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded-full uppercase font-bold tracking-wide">
-                    {project.category}
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <Link
-                      href={`/admin/edit/${project.id}`}
-                      className="text-xs font-bold text-gray-700 hover:text-sky-700 transition p-2 hover:bg-sky-50 rounded-lg"
-                    >
-                      Edit
-                      <span className="sr-only"> {project.title}</span>
-                    </Link>
-                    <ConfirmDelete
-                      action={deleteProject}
-                      fields={{ id: project.id }}
-                      itemLabel={project.title}
-                    />
-                  </div>
-                </div>
-              </li>
-            ))}
-          </ul>
-
-          {projectRows.length === 0 && (
-            <p className="text-center py-10 text-gray-600 text-sm">
-              No projects yet. Add your first one above.
-            </p>
-          )}
-        </section>
       </div>
     </div>
   );

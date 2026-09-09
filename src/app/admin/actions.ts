@@ -55,6 +55,8 @@ const projectSchema = z.object({
 });
 
 function parseProject(formData: FormData) {
+  const published = formData.get("published") !== null;
+
   const parsed = projectSchema.safeParse({
     title: formData.get("title"),
     slug: formData.get("slug"),
@@ -69,7 +71,7 @@ function parseProject(formData: FormData) {
   if (!parsed.success) {
     throw new Error(parsed.error.issues.map((issue) => issue.message).join(". "));
   }
-  return parsed.data;
+  return { ...parsed.data, published };
 }
 
 /* ------------------------------------------------------------------- uploads */
@@ -357,6 +359,57 @@ export async function deleteTimelineEntry(
 
     revalidatePublic();
     return { ok: true, message: "Entry removed" };
+  } catch (error) {
+    return { ok: false, message: toMessage(error) };
+  }
+}
+
+/**
+ * Uploads an image for insertion into the markdown body and hands back its
+ * public URL. Called directly from the editor rather than through a form, so
+ * it returns the URL instead of an ActionState.
+ *
+ * Authorization, MIME allowlist and size cap are the same as every other
+ * upload — see uploadImage above.
+ */
+export async function uploadContentImage(
+  formData: FormData,
+): Promise<{ ok: true; url: string } | { ok: false; message: string }> {
+  try {
+    await requireAdmin();
+
+    const file = formData.get("file");
+    if (!(file instanceof File) || file.size === 0) {
+      throw new Error("Choose an image to upload");
+    }
+
+    const url = await uploadImage("project-images", "content", file);
+    return { ok: true, url };
+  } catch (error) {
+    return { ok: false, message: toMessage(error) };
+  }
+}
+
+/** Flip a project between draft and published from the dashboard list. */
+export async function togglePublished(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  try {
+    await requireAdmin();
+
+    const id = String(formData.get("id") ?? "");
+    if (!id) throw new Error("Missing project id");
+    const next = formData.get("next") === "true";
+
+    const { error } = await getSupabaseAdmin()
+      .from("projects")
+      .update({ published: next })
+      .eq("id", id);
+    if (error) throw new Error(error.message);
+
+    revalidatePublic();
+    return { ok: true, message: next ? "Published" : "Moved to drafts" };
   } catch (error) {
     return { ok: false, message: toMessage(error) };
   }

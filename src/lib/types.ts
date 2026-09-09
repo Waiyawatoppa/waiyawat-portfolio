@@ -19,15 +19,24 @@ export interface Project {
   github_url?: string | null;
   live_url?: string | null;
   pdf_url?: string | null;
+  /** Drafts are hidden from the public site, sitemap and static params. */
+  published: boolean;
 }
 
 /** Columns the project grid needs. Avoids shipping every case study to the homepage. */
 export const PROJECT_CARD_COLUMNS =
-  "id, created_at, title, slug, description, cover_url, category";
+  "id, created_at, title, slug, description, cover_url, category, published";
 
 export type ProjectCard = Pick<
   Project,
-  "id" | "created_at" | "title" | "slug" | "description" | "cover_url" | "category"
+  | "id"
+  | "created_at"
+  | "title"
+  | "slug"
+  | "description"
+  | "cover_url"
+  | "category"
+  | "published"
 >;
 
 export interface Slide {

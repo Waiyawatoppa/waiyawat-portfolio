@@ -12,11 +12,15 @@ import {
  * Every mutation lives in src/app/admin/actions.ts behind the service role.
  */
 
-/** Cards for the homepage grid. Deliberately omits `content`, which can be tens of kilobytes per row. */
+/**
+ * Cards for the homepage grid. Deliberately omits `content`, which can be tens
+ * of kilobytes per row, and excludes drafts.
+ */
 export async function getProjectCards(): Promise<ProjectCard[]> {
   const { data, error } = await supabase
     .from("projects")
     .select(PROJECT_CARD_COLUMNS)
+    .eq("published", true)
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -26,11 +30,16 @@ export async function getProjectCards(): Promise<ProjectCard[]> {
   return (data ?? []) as unknown as ProjectCard[];
 }
 
+/**
+ * Public lookup: drafts resolve to null so an unfinished case study 404s rather
+ * than leaking. The admin edit page reads by id instead and is not affected.
+ */
 export async function getProjectBySlug(slug: string): Promise<Project | null> {
   const { data, error } = await supabase
     .from("projects")
     .select("*")
     .eq("slug", slug)
+    .eq("published", true)
     .maybeSingle();
 
   if (error) {
@@ -47,6 +56,7 @@ export async function getProjectIndex(): Promise<
   const { data, error } = await supabase
     .from("projects")
     .select("slug, created_at")
+    .eq("published", true)
     .order("created_at", { ascending: false });
 
   if (error) {
