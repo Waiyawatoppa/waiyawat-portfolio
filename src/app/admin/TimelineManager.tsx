@@ -12,8 +12,8 @@ import {
 } from "./actions";
 
 const FIELD =
-  "p-3 bg-gray-50 rounded-xl border border-transparent outline-none focus-visible:ring-2 focus-visible:ring-sky-600 focus-visible:border-sky-600";
-const LABEL = "text-xs font-bold uppercase text-gray-600";
+  "p-3 bg-surface-raised rounded-xl border border-transparent outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:border-accent";
+const LABEL = "text-xs font-bold uppercase text-ink-muted";
 
 /**
  * Shared field set for both the "add" form and the inline "edit" form, so the
@@ -118,7 +118,7 @@ function EntryFields({
           aria-describedby={`${idPrefix}-sort-hint`}
           className={FIELD}
         />
-        <p id={`${idPrefix}-sort-hint`} className="text-xs text-gray-600">
+        <p id={`${idPrefix}-sort-hint`} className="text-xs text-ink-muted">
           Higher numbers appear first.
         </p>
       </div>
@@ -162,7 +162,7 @@ function EditRow({
   return (
     <form
       action={formAction}
-      className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border border-sky-300 bg-sky-50/40 rounded-2xl"
+      className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border border-sky-300 bg-accent-soft/40 rounded-2xl"
     >
       <input type="hidden" name="id" value={entry.id} />
       <EntryFields idPrefix={`edit-${entry.id}`} entry={entry} />
@@ -173,7 +173,7 @@ function EditRow({
         <button
           type="submit"
           disabled={pending}
-          className="px-5 py-2.5 rounded-xl bg-sky-700 text-white text-sm font-bold hover:bg-sky-800 transition disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-700"
+          className="px-5 py-2.5 rounded-xl bg-sky-700 text-white text-sm font-bold hover:bg-sky-800 transition disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
         >
           {pending ? "Saving..." : "Save"}
         </button>
@@ -181,7 +181,7 @@ function EditRow({
           type="button"
           onClick={onDone}
           disabled={pending}
-          className="px-4 py-2.5 rounded-xl text-sm font-bold text-gray-700 hover:bg-gray-100 transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-700"
+          className="px-4 py-2.5 rounded-xl text-sm font-bold text-ink-secondary hover:bg-surface-muted transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
         >
           Cancel
         </button>
@@ -208,10 +208,10 @@ export default function TimelineManager({
   );
 
   return (
-    <div className="space-y-6 bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
+    <div className="space-y-6 bg-surface p-8 rounded-3xl shadow-sm border border-line">
       <div>
-        <h2 className="font-bold text-gray-900">Manage Journey</h2>
-        <p className="text-xs text-gray-600">
+        <h2 className="font-bold text-ink">Manage Journey</h2>
+        <p className="text-xs text-ink-muted">
           Education, experience and awards shown in the Journey section.
         </p>
       </div>
@@ -227,7 +227,7 @@ export default function TimelineManager({
           <button
             type="submit"
             disabled={pending}
-            className="w-full py-3 rounded-2xl bg-gray-900 text-white font-bold hover:bg-black transition disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-700"
+            className="w-full py-3 rounded-2xl bg-ink text-surface font-bold hover:bg-ink/90 transition disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
           >
             {pending ? "Saving..." : "Add Entry"}
           </button>
@@ -245,13 +245,13 @@ export default function TimelineManager({
           ) : (
             <li
               key={entry.id}
-              className="flex flex-wrap items-center justify-between gap-4 p-4 border border-gray-200 rounded-2xl"
+              className="flex flex-wrap items-center justify-between gap-4 p-4 border border-line rounded-2xl"
             >
               <div className="min-w-0">
-                <p className="font-bold text-gray-900 truncate">
+                <p className="font-bold text-ink truncate">
                   {entry.title}
                 </p>
-                <p className="text-xs text-gray-600 truncate">
+                <p className="text-xs text-ink-muted truncate">
                   {entry.organization} · {entry.period} · {entry.kind} · sort{" "}
                   {entry.sort_order}
                 </p>
@@ -260,7 +260,7 @@ export default function TimelineManager({
                 <button
                   type="button"
                   onClick={() => setEditingId(entry.id)}
-                  className="text-xs font-bold text-gray-700 hover:text-sky-800 transition p-2 hover:bg-sky-50 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-700"
+                  className="text-xs font-bold text-ink-secondary hover:text-accent-strong transition p-2 hover:bg-accent-soft rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
                 >
                   Edit
                   <span className="sr-only"> {entry.title}</span>
@@ -277,7 +277,7 @@ export default function TimelineManager({
       </ul>
 
       {entries.length === 0 && (
-        <p className="py-8 text-center text-sm text-gray-600 border-2 border-dashed border-gray-200 rounded-xl">
+        <p className="py-8 text-center text-sm text-ink-muted border-2 border-dashed border-line rounded-xl">
           No journey entries yet. The Journey section stays hidden until you add
           one.
         </p>

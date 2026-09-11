@@ -24,15 +24,15 @@ export default async function EditProjectPage(props: {
   if (!project) notFound();
 
   return (
-    <div className="min-h-dvh bg-gray-50 pt-24 pb-12 px-6">
+    <div className="min-h-dvh bg-surface-raised pt-24 pb-12 px-6">
       <div className="max-w-4xl mx-auto">
         <Link
           href="/admin"
-          className="text-sm text-gray-700 hover:text-sky-700 transition inline-flex items-center gap-2 mb-6"
+          className="text-sm text-ink-secondary hover:text-accent transition inline-flex items-center gap-2 mb-6"
         >
           ← Back to dashboard
         </Link>
-        <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
+        <div className="bg-surface rounded-3xl p-8 shadow-sm border border-line">
           <h1 className="text-2xl font-bold mb-8">
             Edit Project: {(project as Project).title}
           </h1>

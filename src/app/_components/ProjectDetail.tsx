@@ -10,7 +10,7 @@ import Markdown from "./Markdown";
 import ReadingPane from "./ReadingPane";
 
 const LINK_BASE =
-  "px-6 py-2 rounded-full text-sm font-bold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-700";
+  "px-6 py-2 rounded-full text-sm font-bold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
 
 const LOCALE: Record<Project["lang"], string> = { en: "en-GB", th: "th-TH" };
 
@@ -25,17 +25,17 @@ function NeighbourCard({
   return (
     <Link
       href={`/project/${project.slug}`}
-      className={`group flex flex-col gap-2 rounded-2xl border border-gray-200 p-5 hover:border-sky-400 hover:bg-sky-50/40 transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-700 ${
+      className={`group flex flex-col gap-2 rounded-2xl border border-line p-5 hover:border-sky-400 hover:bg-accent-soft/40 transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
         isNext ? "text-right items-end" : ""
       }`}
     >
-      <span className="text-xs font-bold uppercase tracking-widest text-gray-500">
+      <span className="text-xs font-bold uppercase tracking-widest text-ink-muted">
         {isNext ? "Next project →" : "← Previous project"}
       </span>
-      <span className="text-[10px] font-bold uppercase tracking-widest text-sky-900 bg-sky-100 px-2 py-0.5 rounded-full">
+      <span className="text-[10px] font-bold uppercase tracking-widest text-accent-strong bg-accent-soft px-2 py-0.5 rounded-full">
         {project.category}
       </span>
-      <span className="font-bold text-gray-900 group-hover:text-sky-800 leading-snug">
+      <span className="font-bold text-ink group-hover:text-accent-strong leading-snug">
         {project.title}
       </span>
     </Link>
@@ -87,9 +87,9 @@ export default function ProjectDetail({
         lang={lang}
         itemScope
         itemType="https://schema.org/Article"
-        className="font-serif text-gray-700"
+        className="font-serif text-ink-secondary"
       >
-        <div className="w-full aspect-[21/9] bg-gray-100 overflow-hidden relative">
+        <div className="w-full aspect-[21/9] bg-surface-muted overflow-hidden relative">
           <CoverImage
             src={project.cover_url}
             alt={`Cover image for ${project.title}`}
@@ -99,7 +99,7 @@ export default function ProjectDetail({
         </div>
 
         <div className="max-w-2xl mx-auto px-6 md:px-0 py-12">
-          <header className="font-sans mb-8 border-b border-gray-200 pb-8">
+          <header className="font-sans mb-8 border-b border-line pb-8">
             <p className="mb-4 flex flex-wrap items-center gap-2">
               <span className="text-[10px] font-bold bg-sky-400 text-sky-950 px-3 py-1 rounded-full uppercase tracking-widest">
                 {project.category}
@@ -107,7 +107,7 @@ export default function ProjectDetail({
               {project.tags?.map((tag) => (
                 <span
                   key={tag}
-                  className="text-[10px] font-bold bg-gray-100 text-gray-800 px-2.5 py-1 rounded-full tracking-wide"
+                  className="text-[10px] font-bold bg-surface-muted text-ink-secondary px-2.5 py-1 rounded-full tracking-wide"
                 >
                   #{tag}
                 </span>
@@ -117,18 +117,18 @@ export default function ProjectDetail({
             <Heading
               id={titleId}
               itemProp="headline"
-              className="text-4xl md:text-5xl font-bold mb-6 tracking-tight text-gray-900 leading-tight text-balance"
+              className="text-4xl md:text-5xl font-bold mb-6 tracking-tight text-ink leading-tight text-balance"
             >
               {project.title}
             </Heading>
 
-            <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-gray-500">
+            <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-ink-muted">
               <address className="not-italic inline">
                 <a
                   rel="author"
                   href={site.url}
                   itemProp="author"
-                  className="font-medium text-gray-700 hover:text-sky-800 rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-700"
+                  className="font-medium text-ink-secondary hover:text-accent-strong rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
                 >
                   {site.name}
                 </a>
@@ -149,27 +149,27 @@ export default function ProjectDetail({
           </header>
 
           <div itemProp="articleBody" className="break-words">
-            <p className="font-sans font-semibold text-[1.15em] text-gray-900 italic border-l-4 border-gray-200 pl-6 my-6">
+            <p className="font-sans font-semibold text-[1.15em] text-ink italic border-l-4 border-line pl-6 my-6">
               {project.description}
             </p>
 
             {content.trim() ? (
               <Markdown content={content} />
             ) : (
-              <p className="my-6 text-gray-500 italic">
+              <p className="my-6 text-ink-muted italic">
                 The full write-up for this project is still being written.
               </p>
             )}
           </div>
 
           {(github || live || pdf) && (
-            <div className="mt-12 pt-8 border-t border-gray-200 flex flex-wrap items-center gap-4 font-sans">
+            <div className="mt-12 pt-8 border-t border-line flex flex-wrap items-center gap-4 font-sans">
               {github && (
                 <a
                   href={github}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`${LINK_BASE} border border-gray-300 hover:bg-gray-50`}
+                  className={`${LINK_BASE} border border-line-strong hover:bg-surface-raised`}
                 >
                   GitHub Repository
                   <span className="sr-only"> (opens in a new tab)</span>
@@ -181,7 +181,7 @@ export default function ProjectDetail({
                   href={live}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`${LINK_BASE} bg-gray-900 text-white hover:bg-gray-800 shadow-lg`}
+                  className={`${LINK_BASE} bg-ink text-surface hover:bg-ink/85 shadow-lg`}
                 >
                   Visit Live Site
                   <span className="sr-only"> (opens in a new tab)</span>
@@ -193,7 +193,7 @@ export default function ProjectDetail({
                   href={pdf}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`${LINK_BASE} inline-flex items-center gap-2 bg-white text-gray-900 border-2 border-gray-900 hover:bg-gray-900 hover:text-white`}
+                  className={`${LINK_BASE} inline-flex items-center gap-2 bg-surface text-ink border-2 border-ink hover:bg-ink hover:text-surface`}
                 >
                   <svg
                     className="w-4 h-4"
@@ -219,7 +219,7 @@ export default function ProjectDetail({
           {(previous || next) && (
             <nav
               aria-label="More projects"
-              className="mt-12 pt-8 border-t border-gray-200 grid grid-cols-1 sm:grid-cols-2 gap-4 font-sans"
+              className="mt-12 pt-8 border-t border-line grid grid-cols-1 sm:grid-cols-2 gap-4 font-sans"
             >
               <div>
                 {previous && (

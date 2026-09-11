@@ -62,12 +62,12 @@ export default function ConfirmDelete({
       action={formAction}
       className={
         variant === "overlay"
-          ? "absolute inset-0 bg-white/95 flex flex-col items-center justify-center gap-2 p-2 text-center"
+          ? "absolute inset-0 bg-surface/95 flex flex-col items-center justify-center gap-2 p-2 text-center"
           : "flex items-center gap-2"
       }
     >
       {hidden}
-      <span className="text-xs text-gray-700">Delete {itemLabel}?</span>
+      <span className="text-xs text-ink-secondary">Delete {itemLabel}?</span>
       <div className="flex items-center gap-2">
         <button
           type="submit"
@@ -80,7 +80,7 @@ export default function ConfirmDelete({
           type="button"
           onClick={() => setConfirming(false)}
           disabled={pending}
-          className="text-xs font-bold text-gray-700 hover:text-gray-900 px-2 py-1.5"
+          className="text-xs font-bold text-ink-secondary hover:text-ink px-2 py-1.5"
         >
           Cancel
         </button>

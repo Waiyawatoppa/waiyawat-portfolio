@@ -37,7 +37,7 @@ export default function Markdown({ content }: { content: string }) {
     h1: ({ children }) => (
       <h2
         id={nextId(toText(children))}
-        className="font-sans text-[1.55em] md:text-[1.7em] font-bold text-gray-900 mt-12 mb-4 scroll-mt-28"
+        className="font-sans text-[1.55em] md:text-[1.7em] font-bold text-ink mt-12 mb-4 scroll-mt-28"
       >
         {children}
       </h2>
@@ -45,7 +45,7 @@ export default function Markdown({ content }: { content: string }) {
     h2: ({ children }) => (
       <h2
         id={nextId(toText(children))}
-        className="font-sans text-[1.55em] md:text-[1.7em] font-bold text-gray-900 mt-12 mb-4 scroll-mt-28"
+        className="font-sans text-[1.55em] md:text-[1.7em] font-bold text-ink mt-12 mb-4 scroll-mt-28"
       >
         {children}
       </h2>
@@ -53,13 +53,13 @@ export default function Markdown({ content }: { content: string }) {
     h3: ({ children }) => (
       <h3
         id={nextId(toText(children))}
-        className="font-sans text-[1.3em] md:text-[1.4em] font-bold text-gray-900 mt-10 mb-3 scroll-mt-28"
+        className="font-sans text-[1.3em] md:text-[1.4em] font-bold text-ink mt-10 mb-3 scroll-mt-28"
       >
         {children}
       </h3>
     ),
     h4: ({ children }) => (
-      <h4 className="font-sans text-[1.15em] font-bold text-gray-900 mt-8 mb-2">
+      <h4 className="font-sans text-[1.15em] font-bold text-ink mt-8 mb-2">
         {children}
       </h4>
     ),
@@ -85,7 +85,7 @@ export default function Markdown({ content }: { content: string }) {
         const id = href ? youtubeId(href) : null;
         if (id) {
           return (
-            <span className="block my-8 aspect-video overflow-hidden rounded-2xl border border-gray-200 bg-gray-900">
+            <span className="block my-8 aspect-video overflow-hidden rounded-2xl border border-line bg-gray-900">
               <iframe
                 src={`https://www.youtube-nocookie.com/embed/${id}`}
                 title="YouTube video"
@@ -102,7 +102,7 @@ export default function Markdown({ content }: { content: string }) {
       return <p className="my-5 leading-loose">{children}</p>;
     },
     strong: ({ children }) => (
-      <strong className="font-semibold text-gray-900">{children}</strong>
+      <strong className="font-semibold text-ink">{children}</strong>
     ),
     em: ({ children }) => <em className="italic">{children}</em>,
     ul: ({ children }) => (
@@ -117,11 +117,11 @@ export default function Markdown({ content }: { content: string }) {
     ),
     li: ({ children }) => <li className="leading-relaxed">{children}</li>,
     blockquote: ({ children }) => (
-      <blockquote className="my-6 border-l-4 border-sky-400 bg-sky-50 pl-6 pr-4 py-3 rounded-r-xl italic text-gray-800">
+      <blockquote className="my-6 border-l-4 border-sky-400 bg-accent-soft pl-6 pr-4 py-3 rounded-r-xl italic text-ink-secondary">
         {children}
       </blockquote>
     ),
-    hr: () => <hr className="my-10 border-gray-200" />,
+    hr: () => <hr className="my-10 border-line" />,
     a: ({ href, children }) => {
       const safe = safeExternalUrl(href);
       if (!safe) return <span>{children}</span>;
@@ -130,7 +130,7 @@ export default function Markdown({ content }: { content: string }) {
           href={safe}
           target="_blank"
           rel="noopener noreferrer"
-          className="font-sans font-medium text-sky-800 underline underline-offset-4 decoration-sky-300 hover:decoration-sky-700 rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-700"
+          className="font-sans font-medium text-accent-strong underline underline-offset-4 decoration-sky-300 hover:decoration-sky-700 rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
         >
           {children}
         </a>
@@ -145,7 +145,7 @@ export default function Markdown({ content }: { content: string }) {
         );
       }
       return (
-        <code className="font-mono text-[0.9em] bg-gray-100 text-pink-800 px-1.5 py-0.5 rounded">
+        <code className="font-mono text-[0.9em] bg-surface-muted text-pink-800 px-1.5 py-0.5 rounded">
           {children}
         </code>
       );
@@ -156,20 +156,20 @@ export default function Markdown({ content }: { content: string }) {
       </pre>
     ),
     table: ({ children }) => (
-      <div className="my-6 overflow-x-auto rounded-2xl border border-gray-200">
+      <div className="my-6 overflow-x-auto rounded-2xl border border-line">
         <table className="w-full font-sans text-[0.85em] border-collapse">
           {children}
         </table>
       </div>
     ),
-    thead: ({ children }) => <thead className="bg-gray-50">{children}</thead>,
+    thead: ({ children }) => <thead className="bg-surface-raised">{children}</thead>,
     th: ({ children }) => (
-      <th className="text-left font-bold text-gray-900 px-4 py-3 border-b border-gray-200">
+      <th className="text-left font-bold text-ink px-4 py-3 border-b border-line">
         {children}
       </th>
     ),
     td: ({ children }) => (
-      <td className="px-4 py-3 border-b border-gray-100 align-top">
+      <td className="px-4 py-3 border-b border-line align-top">
         {children}
       </td>
     ),
@@ -184,10 +184,10 @@ export default function Markdown({ content }: { content: string }) {
             width={1200}
             height={800}
             sizes="(max-width: 768px) 100vw, 672px"
-            className="w-full h-auto rounded-2xl border border-gray-200"
+            className="w-full h-auto rounded-2xl border border-line"
           />
           {alt && (
-            <span className="block mt-2 text-center font-sans text-[0.8em] text-gray-500">
+            <span className="block mt-2 text-center font-sans text-[0.8em] text-ink-muted">
               {alt}
             </span>
           )}

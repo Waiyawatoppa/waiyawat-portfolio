@@ -114,7 +114,7 @@ export default async function ProjectPage(props: {
   return (
     <>
       <SiteNav links={NAV_LINKS} />
-      <main id="main" className="bg-white min-h-dvh">
+      <main id="main" className="bg-surface min-h-dvh">
         {[article, breadcrumbs].map((data, index) => (
           <script
             key={index}
@@ -130,7 +130,7 @@ export default async function ProjectPage(props: {
         <div className="max-w-4xl mx-auto px-6 pt-28 pb-4">
           <Link
             href="/#works"
-            className="text-sm font-bold text-gray-700 hover:text-sky-700 transition inline-flex items-center gap-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-700 rounded"
+            className="text-sm font-bold text-ink-secondary hover:text-accent transition inline-flex items-center gap-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent rounded"
           >
             <span aria-hidden="true">←</span> Back to selected works
           </Link>

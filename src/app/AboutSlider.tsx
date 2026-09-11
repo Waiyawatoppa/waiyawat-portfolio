@@ -41,7 +41,7 @@ export default function AboutSlider({
 
   if (slides.length === 0) {
     return (
-      <div className="relative w-full aspect-square md:aspect-[4/5] rounded-3xl overflow-hidden shadow-lg bg-gray-100 border border-gray-100">
+      <div className="relative w-full aspect-square md:aspect-[4/5] rounded-3xl overflow-hidden shadow-lg bg-surface-muted border border-line">
         <CoverImage
           src={null}
           alt="Portrait placeholder"
@@ -52,7 +52,7 @@ export default function AboutSlider({
   }
 
   return (
-    <div className="relative w-full aspect-square md:aspect-[4/5] rounded-3xl overflow-hidden shadow-lg bg-gray-100 border border-gray-100">
+    <div className="relative w-full aspect-square md:aspect-[4/5] rounded-3xl overflow-hidden shadow-lg bg-surface-muted border border-line">
       {slides.map((slide, index) => (
         <div
           key={slide.id ?? index}
@@ -81,8 +81,8 @@ export default function AboutSlider({
               aria-current={index === activeIndex}
               className={`h-2 rounded-full transition-all duration-300 motion-reduce:transition-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white ${
                 index === activeIndex
-                  ? "bg-white w-6"
-                  : "bg-white/60 hover:bg-white/90 w-2"
+                  ? "bg-surface w-6"
+                  : "bg-surface/60 hover:bg-surface/90 w-2"
               }`}
             />
           ))}

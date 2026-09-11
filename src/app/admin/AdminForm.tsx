@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useActionState, useEffect, useState } from "react";
 
+import { compressFileInput } from "@/lib/compress-image";
 import { clearDraft } from "@/lib/draft-storage";
 import { slugifyTitle } from "@/lib/slug";
 import { CATEGORIES, PROJECT_LANGS, type Project } from "@/lib/types";
@@ -10,8 +11,8 @@ import MarkdownEditor from "./MarkdownEditor";
 import { createProject, updateProject, type ActionState } from "./actions";
 
 const FIELD =
-  "p-3 bg-gray-50 rounded-xl border border-transparent outline-none focus-visible:ring-2 focus-visible:ring-sky-600 focus-visible:border-sky-600";
-const LABEL = "text-xs font-bold uppercase text-gray-600";
+  "p-3 bg-surface-raised rounded-xl border border-transparent outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:border-accent";
+const LABEL = "text-xs font-bold uppercase text-ink-muted";
 
 const LANG_LABEL: Record<(typeof PROJECT_LANGS)[number], string> = {
   en: "English",
@@ -103,7 +104,7 @@ export default function AdminForm({
           aria-describedby="slug-hint"
           className={`${FIELD} font-mono text-sm`}
         />
-        <p id="slug-hint" className="text-xs text-gray-600">
+        <p id="slug-hint" className="text-xs text-ink-muted">
           {isEdit
             ? "This is the page URL. Changing it breaks links already shared."
             : "Follows the title until you edit it. Letters, numbers and hyphens."}
@@ -148,7 +149,7 @@ export default function AdminForm({
           aria-describedby="date-hint"
           className={FIELD}
         />
-        <p id="date-hint" className="text-xs text-gray-600">
+        <p id="date-hint" className="text-xs text-ink-muted">
           When the work happened, not when you added it. Shown as month and
           year, and used for ordering.
         </p>
@@ -190,7 +191,7 @@ export default function AdminForm({
             <option key={tag} value={tag} />
           ))}
         </datalist>
-        <p id="tags-hint" className="text-xs text-gray-600">
+        <p id="tags-hint" className="text-xs text-ink-muted">
           Comma-separated, up to 10.
         </p>
       </div>
@@ -212,7 +213,7 @@ export default function AdminForm({
             </option>
           ))}
         </select>
-        <p id="lang-hint" className="text-xs text-gray-600">
+        <p id="lang-hint" className="text-xs text-ink-muted">
           Tells browsers and screen readers which language the post is in.
         </p>
       </div>
@@ -227,9 +228,10 @@ export default function AdminForm({
           name="image_file"
           accept="image/jpeg,image/png,image/webp,image/avif,image/gif"
           aria-describedby="image-hint"
+          onChange={(event) => void compressFileInput(event.currentTarget)}
           className="text-xs"
         />
-        <p id="image-hint" className="text-xs text-gray-600">
+        <p id="image-hint" className="text-xs text-ink-muted">
           JPEG, PNG, WebP, AVIF or GIF, up to 5MB.
           {isEdit ? " Leave empty to keep the current cover." : ""}
         </p>
@@ -288,7 +290,7 @@ export default function AdminForm({
         </p>
       )}
 
-      <div className="md:col-span-2 flex items-center gap-3 rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3">
+      <div className="md:col-span-2 flex items-center gap-3 rounded-2xl border border-line bg-surface-raised px-4 py-3">
         <input
           id="published"
           type="checkbox"
@@ -296,9 +298,9 @@ export default function AdminForm({
           defaultChecked={initialData?.published ?? true}
           className="w-4 h-4 accent-sky-600"
         />
-        <label htmlFor="published" className="text-sm text-gray-800">
+        <label htmlFor="published" className="text-sm text-ink-secondary">
           <span className="font-bold">Published</span>
-          <span className="text-gray-600">
+          <span className="text-ink-muted">
             {" "}
             — unchecked keeps it as a draft, hidden from the site, the sitemap
             and search engines.
@@ -311,7 +313,7 @@ export default function AdminForm({
           type="submit"
           disabled={pending}
           className={`flex-1 min-w-48 py-4 rounded-2xl font-bold transition text-white disabled:opacity-60 ${
-            isEdit ? "bg-sky-700 hover:bg-sky-800" : "bg-gray-900 hover:bg-black"
+            isEdit ? "bg-sky-700 hover:bg-sky-800" : "bg-gray-900 hover:bg-ink/90"
           }`}
         >
           {pending ? "Saving..." : isEdit ? "Save Changes" : "Publish Project"}
@@ -319,7 +321,7 @@ export default function AdminForm({
         {isEdit && (
           <Link
             href="/admin"
-            className="text-sm font-bold text-gray-700 hover:text-sky-800 transition rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-700"
+            className="text-sm font-bold text-ink-secondary hover:text-accent-strong transition rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
           >
             ← Back to dashboard
           </Link>

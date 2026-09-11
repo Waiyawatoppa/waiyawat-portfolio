@@ -19,29 +19,29 @@ export default function NotFound() {
   return (
     <>
       <SiteNav links={LINKS} />
-      <main id="main" className="bg-white min-h-dvh flex flex-col">
+      <main id="main" className="bg-surface min-h-dvh flex flex-col">
         <section className="flex-1 grid place-items-center px-6 pt-36 pb-20">
           <div className="max-w-xl text-center">
-            <p className="text-xs uppercase tracking-[0.3em] font-bold text-gray-500 mb-4">
+            <p className="text-xs uppercase tracking-[0.3em] font-bold text-ink-muted mb-4">
               404
             </p>
-            <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-gray-900 mb-6 leading-tight">
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-ink mb-6 leading-tight">
               That page isn&rsquo;t here.
             </h1>
-            <p className="text-lg text-gray-600 leading-relaxed mb-10">
+            <p className="text-lg text-ink-muted leading-relaxed mb-10">
               The link may be out of date, or the project may have moved. The
               work is all still here.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Link
                 href="/#works"
-                className="px-8 py-3 bg-gray-900 text-white rounded-full text-sm font-bold hover:bg-sky-700 transition shadow-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-700"
+                className="px-8 py-3 bg-ink text-surface rounded-full text-sm font-bold hover:bg-sky-700 transition shadow-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
               >
                 See selected works
               </Link>
               <Link
                 href="/"
-                className="px-8 py-3 border border-gray-300 rounded-full text-sm font-bold text-gray-900 hover:bg-gray-50 transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-700"
+                className="px-8 py-3 border border-line-strong rounded-full text-sm font-bold text-ink hover:bg-surface-raised transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
               >
                 Back to home
               </Link>

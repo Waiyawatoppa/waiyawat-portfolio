@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useActionState, useRef } from "react";
 
+import { compressFileInput } from "@/lib/compress-image";
 import type { Slide } from "@/lib/types";
 import ConfirmDelete from "./ConfirmDelete";
 import { createSlide, deleteSlide, type ActionState } from "./actions";
@@ -24,11 +25,11 @@ export default function SlideManager({ slides }: { slides: Slide[] }) {
   );
 
   return (
-    <div className="space-y-6 bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
+    <div className="space-y-6 bg-surface p-8 rounded-3xl shadow-sm border border-line">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h2 className="font-bold text-gray-900">Manage About Slider</h2>
-          <p className="text-xs text-gray-600">
+          <h2 className="font-bold text-ink">Manage About Slider</h2>
+          <p className="text-xs text-ink-muted">
             Images shown beside the About section on the homepage.
           </p>
         </div>
@@ -47,6 +48,7 @@ export default function SlideManager({ slides }: { slides: Slide[] }) {
             name="image_file"
             accept="image/jpeg,image/png,image/webp,image/avif,image/gif"
             required
+            onChange={(event) => void compressFileInput(event.currentTarget)}
             className="text-xs max-w-[12rem]"
           />
           <button
@@ -75,7 +77,7 @@ export default function SlideManager({ slides }: { slides: Slide[] }) {
         {slides.map((slide, index) => (
           <li
             key={slide.id}
-            className="relative aspect-square rounded-xl overflow-hidden group border border-gray-200"
+            className="relative aspect-square rounded-xl overflow-hidden group border border-line"
           >
             <Image
               src={slide.image_url}
@@ -95,7 +97,7 @@ export default function SlideManager({ slides }: { slides: Slide[] }) {
       </ul>
 
       {slides.length === 0 && (
-        <p className="py-10 text-center text-sm text-gray-600 border-2 border-dashed border-gray-200 rounded-xl">
+        <p className="py-10 text-center text-sm text-ink-muted border-2 border-dashed border-line rounded-xl">
           No slider images yet. Upload one to get started.
         </p>
       )}

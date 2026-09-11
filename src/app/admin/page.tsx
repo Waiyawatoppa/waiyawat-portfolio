@@ -40,23 +40,23 @@ export default async function AdminPage() {
   const projectRows = (projects ?? []) as ProjectRow[];
 
   return (
-    <div className="min-h-dvh bg-gray-50 pt-24 pb-12 px-6">
+    <div className="min-h-dvh bg-surface-raised pt-24 pb-12 px-6">
       <div className="max-w-4xl mx-auto">
         <header className="mb-10 flex flex-wrap justify-between items-end gap-4">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">
               Admin Dashboard
             </h1>
-            <p className="text-gray-700">
+            <p className="text-ink-secondary">
               Manage your business and tech portfolio.
             </p>
           </div>
-          <div className="flex flex-col items-end gap-2 text-right text-xs text-gray-700">
+          <div className="flex flex-col items-end gap-2 text-right text-xs text-ink-secondary">
             <span>Signed in as {session?.user?.email}</span>
             <div className="flex items-center gap-4">
               <Link
                 href="/"
-                className="text-sky-700 hover:text-sky-900 transition underline"
+                className="text-accent hover:text-accent-strong transition underline"
               >
                 ← Back to site
               </Link>
@@ -74,7 +74,7 @@ export default async function AdminPage() {
           </div>
         </header>
 
-        <section className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 mb-10">
+        <section className="bg-surface rounded-3xl p-8 shadow-sm border border-line mb-10">
           <h2 className="text-xl font-bold mb-6">Add New Project</h2>
           <AdminForm allTags={allTags} />
         </section>

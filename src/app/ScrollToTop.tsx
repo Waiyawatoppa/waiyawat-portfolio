@@ -113,7 +113,7 @@ export default function ScrollToTop() {
               key={section.id}
               type="button"
               onClick={() => scrollToSection(section.id)}
-              className={`px-4 py-2 bg-white text-gray-700 text-xs font-bold rounded-full shadow-lg border border-gray-100 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-700 ${section.hover}`}
+              className={`px-4 py-2 bg-surface text-ink-secondary text-xs font-bold rounded-full shadow-lg border border-line transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${section.hover}`}
             >
               {section.label}
             </button>
@@ -127,7 +127,7 @@ export default function ScrollToTop() {
         onClick={() => (tapOpensMenu ? setOpen(true) : scrollToTop())}
         aria-expanded={showMenu && isTouch ? open : undefined}
         aria-controls={showMenu && isTouch ? "section-shortcuts" : undefined}
-        className="p-4 bg-gray-900 text-white rounded-full shadow-lg hover:bg-sky-400 hover:text-sky-950 hover:scale-105 transition-all duration-300 motion-reduce:transition-none motion-reduce:hover:scale-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-700"
+        className="p-4 bg-ink text-surface rounded-full shadow-lg hover:bg-sky-400 hover:text-sky-950 hover:scale-105 transition-all duration-300 motion-reduce:transition-none motion-reduce:hover:scale-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
       >
         <svg
           className="w-5 h-5"

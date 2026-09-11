@@ -28,7 +28,7 @@ function Track({ duplicate = false }: { duplicate?: boolean }) {
     >
       {SKILLS.map((skill) => (
         <li key={skill} className="flex items-center gap-6 px-6 md:px-8">
-          <span className="text-sm md:text-base font-bold text-gray-700 uppercase tracking-widest whitespace-nowrap">
+          <span className="text-sm md:text-base font-bold text-ink-secondary uppercase tracking-widest whitespace-nowrap">
             {skill}
           </span>
           <span className="text-sky-400 text-xs" aria-hidden="true">
@@ -49,7 +49,7 @@ export default function TechStack() {
     >
       <h2
         id="tech-stack-heading"
-        className="text-xs uppercase tracking-[0.3em] font-bold text-gray-700 mb-8 text-center"
+        className="text-xs uppercase tracking-[0.3em] font-bold text-ink-secondary mb-8 text-center"
       >
         Tech Stack and Skills
       </h2>
@@ -60,7 +60,7 @@ export default function TechStack() {
         <span className="marquee-label-resume">Resume animation</span>
       </label>
 
-      <div className="marquee w-full overflow-hidden bg-white py-8 border-y border-gray-200 flex md:[mask-image:linear-gradient(to_right,transparent_0,black_80px,black_calc(100%-80px),transparent_100%)]">
+      <div className="marquee w-full overflow-hidden bg-surface py-8 border-y border-line flex md:[mask-image:linear-gradient(to_right,transparent_0,black_80px,black_calc(100%-80px),transparent_100%)]">
         <Track />
         <Track duplicate />
       </div>

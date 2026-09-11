@@ -194,7 +194,7 @@ export default function ReadingPane({
   return (
     <div ref={rootRef} className="relative">
       <div
-        className={`reading-chrome sticky ${stickyTop} z-20 h-1 bg-gray-100`}
+        className={`reading-chrome sticky ${stickyTop} z-20 h-1 bg-surface-muted`}
         aria-hidden="true"
       >
         <div
@@ -205,7 +205,7 @@ export default function ReadingPane({
 
       <div className="reading-chrome flex flex-wrap items-center justify-between gap-3 py-4 px-6 md:px-0 font-sans">
         <div className="flex items-center gap-1">
-          <span className="text-xs font-bold uppercase tracking-widest text-gray-500 mr-2">
+          <span className="text-xs font-bold uppercase tracking-widest text-ink-muted mr-2">
             Text size
           </span>
           <button
@@ -213,7 +213,7 @@ export default function ReadingPane({
             onClick={() => changeSize(sizeIndex - 1)}
             disabled={atMin}
             aria-label="Decrease text size"
-            className="w-8 h-8 grid place-items-center rounded-lg border border-gray-300 text-gray-800 font-bold hover:bg-gray-50 disabled:opacity-40 disabled:hover:bg-transparent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-700"
+            className="w-8 h-8 grid place-items-center rounded-lg border border-line-strong text-ink-secondary font-bold hover:bg-surface-raised disabled:opacity-40 disabled:hover:bg-transparent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
           >
             <span aria-hidden="true" className="text-xs">
               A
@@ -224,7 +224,7 @@ export default function ReadingPane({
             onClick={() => changeSize(sizeIndex + 1)}
             disabled={atMax}
             aria-label="Increase text size"
-            className="w-8 h-8 grid place-items-center rounded-lg border border-gray-300 text-gray-800 font-bold hover:bg-gray-50 disabled:opacity-40 disabled:hover:bg-transparent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-700"
+            className="w-8 h-8 grid place-items-center rounded-lg border border-line-strong text-ink-secondary font-bold hover:bg-surface-raised disabled:opacity-40 disabled:hover:bg-transparent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
           >
             <span aria-hidden="true" className="text-base">
               A
@@ -241,7 +241,7 @@ export default function ReadingPane({
             onClick={() => setTocOpen((prev) => !prev)}
             aria-expanded={tocOpen}
             aria-controls="reading-toc"
-            className="text-xs font-bold uppercase tracking-widest text-gray-700 hover:text-sky-800 underline underline-offset-4 rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-700"
+            className="text-xs font-bold uppercase tracking-widest text-ink-secondary hover:text-accent-strong underline underline-offset-4 rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
           >
             {tocOpen ? "Hide contents" : "Contents"}
           </button>
@@ -252,7 +252,7 @@ export default function ReadingPane({
         <nav
           id="reading-toc"
           aria-label="Table of contents"
-          className="reading-chrome mb-8 mx-6 md:mx-0 rounded-2xl border border-gray-200 bg-gray-50 p-5 font-sans"
+          className="reading-chrome mb-8 mx-6 md:mx-0 rounded-2xl border border-line bg-surface-raised p-5 font-sans"
         >
           <ul className="space-y-1 list-none p-0">
             {headings.map((heading) => (
@@ -264,10 +264,10 @@ export default function ReadingPane({
                   type="button"
                   onClick={() => goTo(heading.id)}
                   aria-current={activeId === heading.id ? "location" : undefined}
-                  className={`text-left w-full rounded px-2 py-1 text-sm transition-colors hover:bg-white hover:text-sky-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-700 ${
+                  className={`text-left w-full rounded px-2 py-1 text-sm transition-colors hover:bg-surface hover:text-accent-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
                     activeId === heading.id
-                      ? "text-sky-800 font-bold"
-                      : "text-gray-700"
+                      ? "text-accent-strong font-bold"
+                      : "text-ink-secondary"
                   }`}
                 >
                   {heading.text}
