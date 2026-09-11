@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import { CATEGORIES, displayDate, type ProjectCard } from "@/lib/types";
 import CoverImage from "./_components/CoverImage";
@@ -33,14 +33,24 @@ function categoryStyle(category: string) {
 
 export default function ProjectGrid({ projects }: { projects: ProjectCard[] }) {
   const [activeCategory, setActiveCategory] = useState<string>("All");
+  const [activeTag, setActiveTag] = useState<string | null>(null);
 
-  const filtered =
-    activeCategory === "All"
-      ? projects
-      : projects.filter(
-          (project) =>
-            project.category?.toLowerCase() === activeCategory.toLowerCase(),
-        );
+  const allTags = useMemo(() => {
+    const set = new Set<string>();
+    for (const project of projects) for (const tag of project.tags ?? []) set.add(tag);
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
+  }, [projects]);
+
+  const filtered = projects.filter((project) => {
+    if (
+      activeCategory !== "All" &&
+      project.category?.toLowerCase() !== activeCategory.toLowerCase()
+    ) {
+      return false;
+    }
+    if (activeTag && !(project.tags ?? []).includes(activeTag)) return false;
+    return true;
+  });
 
   return (
     <div className="w-full">
@@ -68,6 +78,33 @@ export default function ProjectGrid({ projects }: { projects: ProjectCard[] }) {
           );
         })}
       </div>
+
+      {allTags.length > 0 && (
+        <div
+          role="group"
+          aria-label="Filter projects by tag"
+          className="flex flex-wrap justify-center gap-2 -mt-6 mb-12"
+        >
+          {allTags.map((tag) => {
+            const active = activeTag === tag;
+            return (
+              <button
+                key={tag}
+                type="button"
+                onClick={() => setActiveTag(active ? null : tag)}
+                aria-pressed={active}
+                className={`px-3 py-1 rounded-full text-xs font-bold tracking-wide transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-700 ${
+                  active
+                    ? "bg-sky-400 text-sky-950"
+                    : "bg-white border border-gray-300 text-gray-700 hover:border-sky-400 hover:text-sky-900"
+                }`}
+              >
+                #{tag}
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       <ul className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-10 list-none p-0">
         {filtered.map((project, index) => (
@@ -104,6 +141,19 @@ export default function ProjectGrid({ projects }: { projects: ProjectCard[] }) {
                   </time>
                 </div>
 
+                {project.tags?.length > 0 && (
+                  <p className="flex flex-wrap gap-1.5 mb-4">
+                    {project.tags.slice(0, 4).map((tag) => (
+                      <span
+                        key={tag}
+                        className="text-[10px] font-bold bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full tracking-wide"
+                      >
+                        #{tag}
+                      </span>
+                    ))}
+                  </p>
+                )}
+
                 <h3 className="text-3xl font-bold mb-3 tracking-tight text-gray-900 group-hover:text-sky-600 transition-colors">
                   {project.title}
                 </h3>
@@ -126,7 +176,9 @@ export default function ProjectGrid({ projects }: { projects: ProjectCard[] }) {
         <p className="py-20 text-center text-gray-500 italic text-lg border-2 border-dashed border-gray-200 rounded-3xl">
           {projects.length === 0
             ? "No projects published yet."
-            : "No projects in this category."}
+            : activeTag
+              ? `No projects tagged #${activeTag} here.`
+              : "No projects in this category."}
         </p>
       )}
     </div>

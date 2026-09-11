@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { isAllowedImageSrc, safeExternalUrl } from "./url";
+import { isAllowedImageSrc, safeExternalUrl, youtubeId } from "./url";
 
 describe("safeExternalUrl", () => {
   it("accepts http and https", () => {
@@ -52,5 +52,23 @@ describe("isAllowedImageSrc", () => {
     expect(isAllowedImageSrc("http://testproject.supabase.co/x.png")).toBe(false);
     expect(isAllowedImageSrc("not a url")).toBe(false);
     expect(isAllowedImageSrc("")).toBe(false);
+  });
+});
+
+describe("youtubeId", () => {
+  it("extracts the id from the common URL shapes", () => {
+    expect(youtubeId("https://www.youtube.com/watch?v=dQw4w9WgXcQ")).toBe("dQw4w9WgXcQ");
+    expect(youtubeId("https://youtu.be/dQw4w9WgXcQ")).toBe("dQw4w9WgXcQ");
+    expect(youtubeId("https://youtube.com/shorts/dQw4w9WgXcQ")).toBe("dQw4w9WgXcQ");
+    expect(youtubeId("https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ")).toBe("dQw4w9WgXcQ");
+    expect(youtubeId("https://m.youtube.com/watch?v=dQw4w9WgXcQ&t=10s")).toBe("dQw4w9WgXcQ");
+  });
+
+  it("rejects lookalikes, http, and malformed ids", () => {
+    expect(youtubeId("https://notyoutube.com/watch?v=dQw4w9WgXcQ")).toBeNull();
+    expect(youtubeId("http://www.youtube.com/watch?v=dQw4w9WgXcQ")).toBeNull();
+    expect(youtubeId("https://www.youtube.com/watch?v=short")).toBeNull();
+    expect(youtubeId("https://www.youtube.com/watch?v=<script>")).toBeNull();
+    expect(youtubeId("not a url")).toBeNull();
   });
 });

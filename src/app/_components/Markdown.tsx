@@ -5,7 +5,7 @@ import remarkBreaks from "remark-breaks";
 import remarkGfm from "remark-gfm";
 
 import { createIdFactory } from "@/lib/markdown";
-import { isAllowedImageSrc, safeExternalUrl } from "@/lib/url";
+import { isAllowedImageSrc, safeExternalUrl, youtubeId } from "@/lib/url";
 
 /**
  * Renders case-study content.
@@ -63,7 +63,44 @@ export default function Markdown({ content }: { content: string }) {
         {children}
       </h4>
     ),
-    p: ({ children }) => <p className="my-5 leading-loose">{children}</p>,
+    p: ({ children }) => {
+      // A paragraph that is nothing but a YouTube link becomes an embed. The
+      // same URL inside a sentence stays an ordinary link.
+      const items = Array.isArray(children) ? children : [children];
+      const only = items.filter(
+        (item) => !(typeof item === "string" && item.trim() === ""),
+      );
+      if (only.length === 1) {
+        const single = only[0];
+        const href =
+          typeof single === "string"
+            ? single
+            : typeof single === "object" &&
+                single !== null &&
+                "props" in single &&
+                typeof (single as { props: { href?: unknown } }).props.href ===
+                  "string"
+              ? (single as { props: { href: string } }).props.href
+              : null;
+        const id = href ? youtubeId(href) : null;
+        if (id) {
+          return (
+            <span className="block my-8 aspect-video overflow-hidden rounded-2xl border border-gray-200 bg-gray-900">
+              <iframe
+                src={`https://www.youtube-nocookie.com/embed/${id}`}
+                title="YouTube video"
+                loading="lazy"
+                allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+                referrerPolicy="strict-origin-when-cross-origin"
+                className="w-full h-full"
+              />
+            </span>
+          );
+        }
+      }
+      return <p className="my-5 leading-loose">{children}</p>;
+    },
     strong: ({ children }) => (
       <strong className="font-semibold text-gray-900">{children}</strong>
     ),

@@ -88,8 +88,16 @@ export default function SiteFooter() {
         </ul>
       </nav>
 
-      <p className="text-gray-500 text-sm">
-        © {new Date().getFullYear()} {site.name}.
+      <p className="text-gray-500 text-sm flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
+        <span>
+          © {new Date().getFullYear()} {site.name}.
+        </span>
+        <a
+          href="/feed.xml"
+          className="hover:text-sky-800 underline underline-offset-4 rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-700"
+        >
+          RSS
+        </a>
       </p>
     </footer>
   );

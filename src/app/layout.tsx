@@ -1,3 +1,4 @@
+import { Analytics } from "@vercel/analytics/next";
 import type { Metadata } from "next";
 import { Inter, Lora } from "next/font/google";
 
@@ -29,7 +30,10 @@ export const metadata: Metadata = {
   applicationName: site.name,
   authors: [{ name: site.name, url: site.url }],
   creator: site.name,
-  alternates: { canonical: "/" },
+  alternates: {
+    canonical: "/",
+    types: { "application/rss+xml": `${site.url}/feed.xml` },
+  },
   openGraph: {
     type: "website",
     locale: "en_US",
@@ -88,6 +92,8 @@ export default function RootLayout({
         {children}
         {modal}
         <ScrollToTop />
+        {/* Cookie-free page-view analytics; only active on Vercel. */}
+        <Analytics />
       </body>
     </html>
   );

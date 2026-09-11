@@ -55,3 +55,23 @@ describe("Markdown", () => {
     expect(html).toContain("overflow-x-auto");
   });
 });
+
+describe("Markdown YouTube embeds", () => {
+  it("turns a bare YouTube link on its own line into a privacy-enhanced embed", () => {
+    const html = render("Intro.\n\nhttps://www.youtube.com/watch?v=dQw4w9WgXcQ\n\nOutro.");
+    expect(html).toContain("<iframe");
+    expect(html).toContain("https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ");
+    expect(html).toContain('loading="lazy"');
+  });
+
+  it("leaves the same URL inside a sentence as an ordinary link", () => {
+    const html = render("Watch it at https://www.youtube.com/watch?v=dQw4w9WgXcQ today.");
+    expect(html).not.toContain("<iframe");
+    expect(html).toContain('href="https://www.youtube.com/watch?v=dQw4w9WgXcQ"');
+  });
+
+  it("never embeds a non-YouTube host", () => {
+    const html = render("https://evil.example/embed/dQw4w9WgXcQ");
+    expect(html).not.toContain("<iframe");
+  });
+});

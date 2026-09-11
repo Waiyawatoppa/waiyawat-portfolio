@@ -24,11 +24,14 @@ const supabaseHost = (() => {
  */
 const csp = [
   "default-src 'self'",
-  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
+  `script-src 'self' 'unsafe-inline' https://va.vercel-scripts.com${isDev ? " 'unsafe-eval'" : ""}`,
   "style-src 'self' 'unsafe-inline'",
   `img-src 'self' data: blob:${supabaseHost ? ` https://${supabaseHost}` : ""}`,
   "font-src 'self' data:",
-  `connect-src 'self'${supabaseHost ? ` https://${supabaseHost}` : ""}${isDev ? " ws: wss:" : ""}`,
+  `connect-src 'self'${supabaseHost ? ` https://${supabaseHost}` : ""} https://vitals.vercel-insights.com${isDev ? " ws: wss:" : ""}`,
+  // Embedded demo videos. The nocookie host serves YouTube without tracking
+  // cookies until the visitor presses play.
+  "frame-src https://www.youtube-nocookie.com",
   "frame-ancestors 'none'",
   "form-action 'self'",
   "base-uri 'self'",

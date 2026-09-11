@@ -312,6 +312,14 @@ export default function MarkdownEditor({
         <BarButton onClick={() => insertBlock("---")} title="Divider">
           <span aria-hidden="true">―</span>
         </BarButton>
+        <BarButton
+          onClick={() =>
+            insertBlock("https://www.youtube.com/watch?v=VIDEO_ID")
+          }
+          title="YouTube video (paste the link on its own line)"
+        >
+          <span aria-hidden="true">▶</span>
+        </BarButton>
 
         <Divider />
 
