@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 
 import { auth, signOut } from "@/auth";
 import { isAdmin } from "@/lib/admin";
+import { getAllTags } from "@/lib/projects";
 import { supabase } from "@/lib/supabase";
 import type { Slide, TimelineEntry } from "@/lib/types";
 import AdminForm from "./AdminForm";
@@ -17,11 +18,12 @@ export default async function AdminPage() {
 
   const session = await auth();
 
-  const [{ data: projects }, { data: slides }, { data: timeline }] =
+  const [{ data: projects }, { data: slides }, { data: timeline }, allTags] =
     await Promise.all([
       supabase
         .from("projects")
-        .select("id, title, slug, category, published, created_at")
+        .select("id, title, slug, category, published, created_at, project_date")
+        .order("project_date", { ascending: false, nullsFirst: false })
         .order("created_at", { ascending: false }),
       supabase
         .from("about_slides")
@@ -32,6 +34,7 @@ export default async function AdminPage() {
         .select("*")
         .order("sort_order", { ascending: false })
         .order("created_at", { ascending: false }),
+      getAllTags(true),
     ]);
 
   const projectRows = (projects ?? []) as ProjectRow[];
@@ -73,7 +76,7 @@ export default async function AdminPage() {
 
         <section className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 mb-10">
           <h2 className="text-xl font-bold mb-6">Add New Project</h2>
-          <AdminForm />
+          <AdminForm allTags={allTags} />
         </section>
 
         <section className="mb-10">

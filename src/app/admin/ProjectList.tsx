@@ -9,7 +9,7 @@ import { deleteProject, togglePublished, type ActionState } from "./actions";
 
 export type ProjectRow = Pick<
   Project,
-  "id" | "title" | "slug" | "category" | "published" | "created_at"
+  "id" | "title" | "slug" | "category" | "published" | "created_at" | "project_date"
 >;
 
 type Filter = "all" | "published" | "draft";

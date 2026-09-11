@@ -1,7 +1,20 @@
 "use client";
 
-import { useRef, useState, type ReactNode } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type ReactNode,
+} from "react";
 
+import {
+  clearDraft,
+  parseDraft,
+  readDraftRaw,
+  subscribeDrafts,
+  writeDraft,
+} from "@/lib/draft-storage";
 import Markdown from "../_components/Markdown";
 import { uploadContentImage } from "./actions";
 
@@ -65,7 +78,7 @@ function BarButton({
       onClick={onClick}
       title={title}
       aria-label={title}
-      className="h-8 min-w-8 px-2 grid place-items-center rounded-lg text-sm text-gray-800 hover:bg-white hover:shadow-sm transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-700"
+      className="h-10 min-w-10 sm:h-8 sm:min-w-8 px-2 grid place-items-center rounded-lg text-sm text-gray-800 hover:bg-white hover:shadow-sm transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-700"
     >
       {children}
     </button>
@@ -76,14 +89,23 @@ const Divider = () => (
   <span aria-hidden="true" className="w-px h-5 bg-gray-300 mx-1" />
 );
 
+const AUTOSAVE_DELAY_MS = 1000;
+
 export default function MarkdownEditor({
   name,
   defaultValue = "",
   rows = 18,
+  draftKey,
 }: {
   name: string;
   defaultValue?: string;
   rows?: number;
+  /**
+   * When set, the text is autosaved to localStorage under this key and a
+   * restore banner is offered if a newer draft is found on load. The parent
+   * clears it after a successful save.
+   */
+  draftKey?: string;
 }) {
   const areaRef = useRef<HTMLTextAreaElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -91,6 +113,43 @@ export default function MarkdownEditor({
   const [preview, setPreview] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [bannerDismissed, setBannerDismissed] = useState(false);
+
+  // Stored draft, read as an external store (server snapshot: none).
+  const draftRaw = useSyncExternalStore(
+    subscribeDrafts,
+    () => (draftKey ? readDraftRaw(draftKey) : null),
+    () => null,
+  );
+  const draft = parseDraft(draftRaw);
+  const showRestore =
+    Boolean(draftKey) &&
+    !bannerDismissed &&
+    draft !== null &&
+    draft.content !== defaultValue &&
+    draft.content !== value;
+
+  // Debounced autosave. An effect is the right tool here: it synchronises
+  // React state *out* to an external system, and does not set state itself.
+  useEffect(() => {
+    if (!draftKey) return;
+    if (value === defaultValue) return;
+    const timer = window.setTimeout(
+      () => writeDraft(draftKey, value),
+      AUTOSAVE_DELAY_MS,
+    );
+    return () => window.clearTimeout(timer);
+  }, [draftKey, value, defaultValue]);
+
+  function restoreDraft() {
+    if (draft) setValue(draft.content);
+    setBannerDismissed(true);
+  }
+
+  function discardDraft() {
+    if (draftKey) clearDraft(draftKey);
+    setBannerDismissed(true);
+  }
 
   /** Apply an edit and put the caret back where the writer expects it. */
   function apply(transform: (value: string, start: number, end: number) => Selection) {
@@ -167,6 +226,43 @@ export default function MarkdownEditor({
 
   return (
     <div className="rounded-2xl border border-gray-200 overflow-hidden bg-white">
+      {showRestore && draft && (
+        <div
+          role="status"
+          className="flex flex-wrap items-center justify-between gap-3 bg-amber-50 border-b border-amber-200 px-4 py-3 text-sm text-amber-950"
+        >
+          <span>
+            <span className="font-bold">Unsaved draft found</span>
+            {draft.savedAt > 0 && (
+              <>
+                {" "}
+                from{" "}
+                <time dateTime={new Date(draft.savedAt).toISOString()}>
+                  {new Date(draft.savedAt).toLocaleString()}
+                </time>
+              </>
+            )}
+            .
+          </span>
+          <span className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={restoreDraft}
+              className="px-3 py-1.5 rounded-lg bg-amber-400 text-amber-950 text-xs font-bold hover:bg-amber-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-700"
+            >
+              Restore
+            </button>
+            <button
+              type="button"
+              onClick={discardDraft}
+              className="px-3 py-1.5 rounded-lg text-xs font-bold text-amber-950 hover:bg-amber-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-700"
+            >
+              Discard
+            </button>
+          </span>
+        </div>
+      )}
+
       <div className="flex flex-wrap items-center gap-1 bg-gray-50 border-b border-gray-200 p-2">
         <BarButton onClick={() => wrap("**")} title="Bold (Ctrl+B)">
           <span className="font-black">B</span>
@@ -233,7 +329,7 @@ export default function MarkdownEditor({
           className="hidden"
         />
 
-        <div className="ml-auto flex items-center gap-1">
+        <div className="ml-auto w-full sm:w-auto flex items-center justify-end gap-1 pt-1 sm:pt-0">
           <button
             type="button"
             onClick={() => setPreview(false)}
@@ -264,7 +360,10 @@ export default function MarkdownEditor({
         id={name}
         name={name}
         value={value}
-        onChange={(event) => setValue(event.target.value)}
+        onChange={(event) => {
+          setValue(event.target.value);
+          setBannerDismissed(true);
+        }}
         onKeyDown={onKeyDown}
         rows={rows}
         required

@@ -119,3 +119,65 @@ body {
     display: none;
   }
 }
+
+/* ---------------------------------------------------- reading polish ----- */
+
+/* Keeps the corner shortcut button from floating over an open dialog. */
+body[data-modal-open] .scroll-top {
+  display: none;
+}
+
+/* Nicer line breaks in prose where supported; harmless elsewhere. */
+article p {
+  text-wrap: pretty;
+}
+
+/* ------------------------------------------------------------- print ----- */
+
+@media print {
+  header,
+  footer,
+  nav:not([aria-label="More projects"]),
+  .scroll-top,
+  .reading-chrome,
+  .marquee,
+  .marquee-toggle {
+    display: none !important;
+  }
+
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  main {
+    padding-top: 0 !important;
+  }
+
+  article {
+    max-width: none !important;
+    color: #000 !important;
+  }
+
+  a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.8em;
+    color: #555;
+  }
+
+  h1,
+  h2,
+  h3,
+  img,
+  pre,
+  blockquote,
+  table {
+    break-inside: avoid;
+  }
+
+  h1,
+  h2,
+  h3 {
+    break-after: avoid;
+  }
+}

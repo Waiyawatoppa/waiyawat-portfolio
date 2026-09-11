@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
 import { isAdmin } from "@/lib/admin";
+import { getAllTags } from "@/lib/projects";
 import { supabase } from "@/lib/supabase";
 import type { Project } from "@/lib/types";
 import AdminForm from "../../AdminForm";
@@ -15,11 +16,10 @@ export default async function EditProjectPage(props: {
 
   const { id } = await props.params;
 
-  const { data: project } = await supabase
-    .from("projects")
-    .select("*")
-    .eq("id", id)
-    .maybeSingle();
+  const [{ data: project }, allTags] = await Promise.all([
+    supabase.from("projects").select("*").eq("id", id).maybeSingle(),
+    getAllTags(true),
+  ]);
 
   if (!project) notFound();
 
@@ -36,7 +36,7 @@ export default async function EditProjectPage(props: {
           <h1 className="text-2xl font-bold mb-8">
             Edit Project: {(project as Project).title}
           </h1>
-          <AdminForm initialData={project as Project} />
+          <AdminForm initialData={project as Project} allTags={allTags} />
         </div>
       </div>
     </div>

@@ -77,12 +77,20 @@ function parseSizeIndex(stored: string | null): number {
  * progress bar. The article itself stays server-rendered so it is present in
  * the HTML for crawlers; this only wraps it.
  */
+/**
+ * Layout contract: `children` is the <article> itself. The chrome rendered
+ * here (progress, size controls, contents) sits *beside* it, never inside, so
+ * browser Reader Mode extracts the article without the controls' text.
+ */
 export default function ReadingPane({
   headings,
   children,
+  stickyTop = "top-0",
 }: {
   headings: Heading[];
   children: ReactNode;
+  /** Tailwind top-* class for the sticky progress bar (clears a fixed header). */
+  stickyTop?: string;
 }) {
   const rootRef = useRef<HTMLDivElement>(null);
   const [progress, setProgress] = useState(0);
@@ -186,7 +194,7 @@ export default function ReadingPane({
   return (
     <div ref={rootRef} className="relative">
       <div
-        className="sticky top-0 z-20 -mx-6 md:-mx-0 h-1 bg-gray-100"
+        className={`reading-chrome sticky ${stickyTop} z-20 h-1 bg-gray-100`}
         aria-hidden="true"
       >
         <div
@@ -195,7 +203,7 @@ export default function ReadingPane({
         />
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-3 py-4 font-sans">
+      <div className="reading-chrome flex flex-wrap items-center justify-between gap-3 py-4 px-6 md:px-0 font-sans">
         <div className="flex items-center gap-1">
           <span className="text-xs font-bold uppercase tracking-widest text-gray-500 mr-2">
             Text size
@@ -244,7 +252,7 @@ export default function ReadingPane({
         <nav
           id="reading-toc"
           aria-label="Table of contents"
-          className="mb-8 rounded-2xl border border-gray-200 bg-gray-50 p-5 font-sans"
+          className="reading-chrome mb-8 mx-6 md:mx-0 rounded-2xl border border-gray-200 bg-gray-50 p-5 font-sans"
         >
           <ul className="space-y-1 list-none p-0">
             {headings.map((heading) => (

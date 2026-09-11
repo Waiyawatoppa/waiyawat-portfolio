@@ -97,7 +97,7 @@ export default function ScrollToTop() {
   return (
     <div
       ref={rootRef}
-      className="fixed bottom-8 right-8 z-40 flex flex-col items-end gap-3 group"
+      className="scroll-top fixed bottom-8 right-8 z-40 flex flex-col items-end gap-3 group"
     >
       {showMenu && (
         <div

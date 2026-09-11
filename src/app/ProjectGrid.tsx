@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 
-import { CATEGORIES, type ProjectCard } from "@/lib/types";
+import { CATEGORIES, displayDate, type ProjectCard } from "@/lib/types";
 import CoverImage from "./_components/CoverImage";
 
 const FILTERS = ["All", ...CATEGORIES] as const;
@@ -93,17 +93,15 @@ export default function ProjectGrid({ projects }: { projects: ProjectCard[] }) {
                   >
                     {project.category || "Project"}
                   </span>
-                  {project.created_at && (
-                    <time
-                      dateTime={new Date(project.created_at).toISOString()}
-                      className="text-xs text-gray-500"
-                    >
-                      {new Date(project.created_at).toLocaleDateString("en-GB", {
-                        month: "short",
-                        year: "numeric",
-                      })}
-                    </time>
-                  )}
+                  <time
+                    dateTime={displayDate(project).toISOString().slice(0, 10)}
+                    className="text-xs text-gray-500"
+                  >
+                    {displayDate(project).toLocaleDateString("en-GB", {
+                      month: "short",
+                      year: "numeric",
+                    })}
+                  </time>
                 </div>
 
                 <h3 className="text-3xl font-bold mb-3 tracking-tight text-gray-900 group-hover:text-sky-600 transition-colors">

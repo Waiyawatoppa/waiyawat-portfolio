@@ -1,8 +1,11 @@
 "use client";
 
-import { useActionState } from "react";
+import Link from "next/link";
+import { useActionState, useEffect, useState } from "react";
 
-import { CATEGORIES, type Project } from "@/lib/types";
+import { clearDraft } from "@/lib/draft-storage";
+import { slugifyTitle } from "@/lib/slug";
+import { CATEGORIES, PROJECT_LANGS, type Project } from "@/lib/types";
 import MarkdownEditor from "./MarkdownEditor";
 import { createProject, updateProject, type ActionState } from "./actions";
 
@@ -10,12 +13,25 @@ const FIELD =
   "p-3 bg-gray-50 rounded-xl border border-transparent outline-none focus-visible:ring-2 focus-visible:ring-sky-600 focus-visible:border-sky-600";
 const LABEL = "text-xs font-bold uppercase text-gray-600";
 
+const LANG_LABEL: Record<(typeof PROJECT_LANGS)[number], string> = {
+  en: "English",
+  th: "ไทย",
+};
+
+function today(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
 export default function AdminForm({
   initialData,
+  allTags = [],
 }: {
   initialData?: Partial<Project> & { id?: string };
+  /** Existing tags across projects, offered as suggestions. */
+  allTags?: string[];
 }) {
   const isEdit = Boolean(initialData?.id);
+  const draftKey = `project:${initialData?.id ?? "new"}`;
 
   // The action itself enforces authorization and validation; this component
   // only renders whatever it reports back.
@@ -24,11 +40,26 @@ export default function AdminForm({
     null,
   );
 
+  // Title and slug are controlled so the slug can follow the title until the
+  // author edits it directly. Existing projects never auto-change their slug:
+  // that would break every link already shared.
+  const [title, setTitle] = useState(initialData?.title ?? "");
+  const [slug, setSlug] = useState(initialData?.slug ?? "");
+  const [slugTouched, setSlugTouched] = useState(isEdit);
+
+  function onTitleChange(next: string) {
+    setTitle(next);
+    if (!slugTouched) setSlug(slugifyTitle(next));
+  }
+
+  // A successful save makes the autosaved draft redundant. This synchronises
+  // external storage with the action result; it does not set React state.
+  useEffect(() => {
+    if (state?.ok) clearDraft(draftKey);
+  }, [state, draftKey]);
+
   return (
-    <form
-      action={formAction}
-      className="grid grid-cols-1 md:grid-cols-2 gap-6"
-    >
+    <form action={formAction} className="grid grid-cols-1 md:grid-cols-2 gap-6">
       {isEdit && (
         <>
           <input type="hidden" name="id" defaultValue={initialData?.id} />
@@ -47,7 +78,8 @@ export default function AdminForm({
         <input
           id="title"
           name="title"
-          defaultValue={initialData?.title}
+          value={title}
+          onChange={(event) => onTitleChange(event.target.value)}
           required
           maxLength={200}
           className={FIELD}
@@ -61,16 +93,20 @@ export default function AdminForm({
         <input
           id="slug"
           name="slug"
-          defaultValue={initialData?.slug}
+          value={slug}
+          onChange={(event) => {
+            setSlugTouched(true);
+            setSlug(event.target.value);
+          }}
           required
           maxLength={120}
-          pattern="[a-z0-9]+(-[a-z0-9]+)*"
           aria-describedby="slug-hint"
-          className={FIELD}
+          className={`${FIELD} font-mono text-sm`}
         />
         <p id="slug-hint" className="text-xs text-gray-600">
-          Lowercase letters, numbers and single hyphens. This becomes the page
-          URL, so changing it breaks existing links.
+          {isEdit
+            ? "This is the page URL. Changing it breaks links already shared."
+            : "Follows the title until you edit it. Letters, numbers and hyphens."}
         </p>
       </div>
 
@@ -95,24 +131,26 @@ export default function AdminForm({
         <MarkdownEditor
           name="content"
           defaultValue={initialData?.content ?? ""}
+          draftKey={draftKey}
         />
       </div>
 
       <div className="flex flex-col gap-2">
-        <label htmlFor="image_file" className={LABEL}>
-          {isEdit ? "Replace Cover Image" : "Cover Image"}
+        <label htmlFor="project_date" className={LABEL}>
+          Project Date
         </label>
         <input
-          id="image_file"
-          type="file"
-          name="image_file"
-          accept="image/jpeg,image/png,image/webp,image/avif,image/gif"
-          aria-describedby="image-hint"
-          className="text-xs"
+          id="project_date"
+          name="project_date"
+          type="date"
+          defaultValue={initialData?.project_date ?? today()}
+          required
+          aria-describedby="date-hint"
+          className={FIELD}
         />
-        <p id="image-hint" className="text-xs text-gray-600">
-          JPEG, PNG, WebP, AVIF or GIF, up to 5MB.
-          {isEdit ? " Leave empty to keep the current cover." : ""}
+        <p id="date-hint" className="text-xs text-gray-600">
+          When the work happened, not when you added it. Shown as month and
+          year, and used for ordering.
         </p>
       </div>
 
@@ -132,6 +170,69 @@ export default function AdminForm({
             </option>
           ))}
         </select>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <label htmlFor="tags" className={LABEL}>
+          Tags (Optional)
+        </label>
+        <input
+          id="tags"
+          name="tags"
+          defaultValue={initialData?.tags?.join(", ") ?? ""}
+          list="tag-suggestions"
+          placeholder="react, iot, business-model"
+          aria-describedby="tags-hint"
+          className={FIELD}
+        />
+        <datalist id="tag-suggestions">
+          {allTags.map((tag) => (
+            <option key={tag} value={tag} />
+          ))}
+        </datalist>
+        <p id="tags-hint" className="text-xs text-gray-600">
+          Comma-separated, up to 10.
+        </p>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <label htmlFor="lang" className={LABEL}>
+          Language
+        </label>
+        <select
+          id="lang"
+          name="lang"
+          defaultValue={initialData?.lang ?? "en"}
+          aria-describedby="lang-hint"
+          className={FIELD}
+        >
+          {PROJECT_LANGS.map((lang) => (
+            <option key={lang} value={lang}>
+              {LANG_LABEL[lang]}
+            </option>
+          ))}
+        </select>
+        <p id="lang-hint" className="text-xs text-gray-600">
+          Tells browsers and screen readers which language the post is in.
+        </p>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <label htmlFor="image_file" className={LABEL}>
+          {isEdit ? "Replace Cover Image" : "Cover Image"}
+        </label>
+        <input
+          id="image_file"
+          type="file"
+          name="image_file"
+          accept="image/jpeg,image/png,image/webp,image/avif,image/gif"
+          aria-describedby="image-hint"
+          className="text-xs"
+        />
+        <p id="image-hint" className="text-xs text-gray-600">
+          JPEG, PNG, WebP, AVIF or GIF, up to 5MB.
+          {isEdit ? " Leave empty to keep the current cover." : ""}
+        </p>
       </div>
 
       <div className="flex flex-col gap-2">
@@ -205,19 +306,25 @@ export default function AdminForm({
         </label>
       </div>
 
-      <button
-        type="submit"
-        disabled={pending}
-        className={`md:col-span-2 py-4 rounded-2xl font-bold transition text-white mt-2 disabled:opacity-60 ${
-          isEdit ? "bg-sky-700 hover:bg-sky-800" : "bg-gray-900 hover:bg-black"
-        }`}
-      >
-        {pending
-          ? "Saving..."
-          : isEdit
-            ? "Update Project"
-            : "Publish Project"}
-      </button>
+      <div className="md:col-span-2 flex flex-wrap items-center gap-4 mt-2">
+        <button
+          type="submit"
+          disabled={pending}
+          className={`flex-1 min-w-48 py-4 rounded-2xl font-bold transition text-white disabled:opacity-60 ${
+            isEdit ? "bg-sky-700 hover:bg-sky-800" : "bg-gray-900 hover:bg-black"
+          }`}
+        >
+          {pending ? "Saving..." : isEdit ? "Save Changes" : "Publish Project"}
+        </button>
+        {isEdit && (
+          <Link
+            href="/admin"
+            className="text-sm font-bold text-gray-700 hover:text-sky-800 transition rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-700"
+          >
+            ← Back to dashboard
+          </Link>
+        )}
+      </div>
     </form>
   );
 }

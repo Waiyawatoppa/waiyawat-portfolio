@@ -10,6 +10,13 @@ export const site = {
   shortName: "Waiyawat",
   role: "Computer Science student at Kasetsart University",
   title: "Waiyawat Aphiraktanon — Portfolio",
+  /**
+   * Page-title suffix. Uses " | " rather than " — " because browser Reader
+   * Mode (Firefox's Readability, and Safari's equivalent) only recognises
+   * | - / > » as site-name separators; with an em dash the reader title would
+   * read "Post title — Waiyawat" instead of just the post title.
+   */
+  titleTemplate: "%s | Waiyawat",
   description:
     "Computer Science student at Kasetsart University, building technology that bridges business strategy and positive social impact.",
 

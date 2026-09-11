@@ -49,8 +49,10 @@ export default function Modal({
   useEffect(() => {
     const { overflow } = document.body.style;
     document.body.style.overflow = "hidden";
+    document.body.setAttribute("data-modal-open", "");
     return () => {
       document.body.style.overflow = overflow;
+      document.body.removeAttribute("data-modal-open");
     };
   }, []);
 
@@ -92,7 +94,7 @@ export default function Modal({
   return (
     <div
       className={`fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm ${
-        expanded ? "p-0" : "p-4 md:p-10"
+        expanded ? "p-0" : "p-0 sm:p-4 md:p-10"
       }`}
     >
       <button
@@ -111,8 +113,8 @@ export default function Modal({
         tabIndex={-1}
         className={`relative bg-white w-full shadow-2xl overflow-hidden flex flex-col ${
           expanded
-            ? "max-w-none h-full rounded-none"
-            : "max-w-4xl max-h-full rounded-3xl"
+            ? "h-dvh max-w-none lg:max-w-6xl rounded-none"
+            : "h-dvh sm:h-auto sm:max-h-full max-w-4xl rounded-none sm:rounded-3xl"
         }`}
       >
         <div className="px-6 md:px-8 py-4 border-b border-gray-200 flex justify-between items-center bg-white shrink-0">
