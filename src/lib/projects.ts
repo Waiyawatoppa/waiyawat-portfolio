@@ -21,6 +21,7 @@ export async function getProjectCards(): Promise<ProjectCard[]> {
     .from("projects")
     .select(PROJECT_CARD_COLUMNS)
     .eq("published", true)
+    .order("project_date", { ascending: false, nullsFirst: false })
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -49,21 +50,85 @@ export async function getProjectBySlug(slug: string): Promise<Project | null> {
   return (data as Project) ?? null;
 }
 
-/** Used by generateStaticParams and the sitemap. */
-export async function getProjectIndex(): Promise<
-  Pick<Project, "slug" | "created_at">[]
-> {
+export type ProjectIndexRow = Pick<
+  Project,
+  "slug" | "title" | "description" | "created_at" | "updated_at" | "project_date"
+>;
+
+/** Used by generateStaticParams, the sitemap and the RSS feed. */
+export async function getProjectIndex(): Promise<ProjectIndexRow[]> {
   const { data, error } = await supabase
     .from("projects")
-    .select("slug, created_at")
+    .select("slug, title, description, created_at, updated_at, project_date")
     .eq("published", true)
+    .order("project_date", { ascending: false, nullsFirst: false })
     .order("created_at", { ascending: false });
 
   if (error) {
     console.error("Failed to load project index:", error.message);
     return [];
   }
-  return (data ?? []) as Pick<Project, "slug" | "created_at">[];
+  return (data ?? []) as ProjectIndexRow[];
+}
+
+export type AdjacentProject = Pick<
+  Project,
+  "slug" | "title" | "category" | "cover_url"
+>;
+
+/**
+ * Neighbours in reading order (newest first), so "next" is the older project
+ * and "previous" the newer one — matching the direction of the grid.
+ */
+export async function getAdjacentProjects(
+  current: Pick<Project, "project_date" | "created_at">,
+): Promise<{ previous: AdjacentProject | null; next: AdjacentProject | null }> {
+  const columns = "slug, title, category, cover_url";
+  const pivot = current.project_date ?? current.created_at.slice(0, 10);
+
+  const [older, newer] = await Promise.all([
+    supabase
+      .from("projects")
+      .select(columns)
+      .eq("published", true)
+      .lt("project_date", pivot)
+      .order("project_date", { ascending: false })
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+    supabase
+      .from("projects")
+      .select(columns)
+      .eq("published", true)
+      .gt("project_date", pivot)
+      .order("project_date", { ascending: true })
+      .order("created_at", { ascending: true })
+      .limit(1)
+      .maybeSingle(),
+  ]);
+
+  return {
+    previous: (newer.data as AdjacentProject | null) ?? null,
+    next: (older.data as AdjacentProject | null) ?? null,
+  };
+}
+
+/** Distinct tags across published projects, for filters and editor suggestions. */
+export async function getAllTags(includeDrafts = false): Promise<string[]> {
+  let query = supabase.from("projects").select("tags");
+  if (!includeDrafts) query = query.eq("published", true);
+
+  const { data, error } = await query;
+  if (error) {
+    console.error("Failed to load tags:", error.message);
+    return [];
+  }
+
+  const set = new Set<string>();
+  for (const row of (data ?? []) as { tags: string[] | null }[]) {
+    for (const tag of row.tags ?? []) set.add(tag);
+  }
+  return Array.from(set).sort((a, b) => a.localeCompare(b));
 }
 
 export async function getSlides(): Promise<Slide[]> {

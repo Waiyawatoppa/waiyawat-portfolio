@@ -40,7 +40,7 @@ function MailIcon() {
  * the library offered no way to set rel="noopener noreferrer" on its anchor.
  */
 const SOCIAL_LINK =
-  "w-11 h-11 grid place-items-center rounded-full text-white shadow-sm transition-transform duration-300 hover:scale-110 motion-reduce:transition-none motion-reduce:hover:scale-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-700";
+  "w-11 h-11 grid place-items-center rounded-full text-white shadow-sm transition-transform duration-300 hover:scale-110 motion-reduce:transition-none motion-reduce:hover:scale-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
 
 const BRAND = {
   github: "bg-[#181717]",
@@ -50,7 +50,7 @@ const BRAND = {
 
 export default function SiteFooter() {
   return (
-    <footer className="py-16 text-center border-t border-gray-200 flex flex-col items-center gap-8">
+    <footer className="py-16 text-center border-t border-line flex flex-col items-center gap-8">
       <nav aria-label="Social links">
         <ul className="flex justify-center items-center gap-4 list-none p-0">
           <li>
@@ -88,8 +88,16 @@ export default function SiteFooter() {
         </ul>
       </nav>
 
-      <p className="text-gray-500 text-sm">
-        © {new Date().getFullYear()} {site.name}.
+      <p className="text-ink-muted text-sm flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
+        <span>
+          © {new Date().getFullYear()} {site.name}.
+        </span>
+        <a
+          href="/feed.xml"
+          className="hover:text-accent-strong underline underline-offset-4 rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+        >
+          RSS
+        </a>
       </p>
     </footer>
   );

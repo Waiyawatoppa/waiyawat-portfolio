@@ -1,7 +1,9 @@
+import { Analytics } from "@vercel/analytics/next";
 import type { Metadata } from "next";
 import { Inter, Lora } from "next/font/google";
 
 import { site } from "@/lib/site";
+import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import "./globals.css";
 import ScrollToTop from "./ScrollToTop";
 
@@ -23,13 +25,16 @@ export const metadata: Metadata = {
   metadataBase: new URL(site.url),
   title: {
     default: site.title,
-    template: `%s — ${site.shortName}`,
+    template: site.titleTemplate,
   },
   description: site.description,
   applicationName: site.name,
   authors: [{ name: site.name, url: site.url }],
   creator: site.name,
-  alternates: { canonical: "/" },
+  alternates: {
+    canonical: "/",
+    types: { "application/rss+xml": `${site.url}/feed.xml` },
+  },
   openGraph: {
     type: "website",
     locale: "en_US",
@@ -69,7 +74,17 @@ export default function RootLayout({
   };
 
   return (
-    <html lang="en" className={`${inter.variable} ${lora.variable}`}>
+    // suppressHydrationWarning: the inline script below may add data-theme
+    // before React hydrates, which is intended and must not be "corrected".
+    <html
+      lang="en"
+      className={`${inter.variable} ${lora.variable}`}
+      suppressHydrationWarning
+    >
+      <head>
+        {/* Applies the stored theme before first paint to avoid a flash. */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+      </head>
       <body className={`${inter.className} antialiased`}>
         <script
           type="application/ld+json"
@@ -88,6 +103,8 @@ export default function RootLayout({
         {children}
         {modal}
         <ScrollToTop />
+        {/* Cookie-free page-view analytics; only active on Vercel. */}
+        <Analytics />
       </body>
     </html>
   );

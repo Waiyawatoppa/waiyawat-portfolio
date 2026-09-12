@@ -7,15 +7,29 @@ export const CATEGORIES = [
 
 export type Category = (typeof CATEGORIES)[number];
 
+export const PROJECT_LANGS = ["en", "th"] as const;
+export type ProjectLang = (typeof PROJECT_LANGS)[number];
+
 export interface Project {
   id: string;
+  /** When the row was entered into the CMS. Not the date shown to readers. */
   created_at: string;
+  /** Maintained by a database trigger; drives dateModified and sitemap lastmod. */
+  updated_at: string;
+  /**
+   * When the work actually happened (ISO date, day precision). Displayed as
+   * month + year and used for ordering. Falls back to created_at for rows that
+   * predate the column.
+   */
+  project_date: string | null;
   title: string;
   slug: string;
   description: string;
   content: string;
   cover_url: string;
   category: string;
+  tags: string[];
+  lang: ProjectLang;
   github_url?: string | null;
   live_url?: string | null;
   pdf_url?: string | null;
@@ -25,19 +39,28 @@ export interface Project {
 
 /** Columns the project grid needs. Avoids shipping every case study to the homepage. */
 export const PROJECT_CARD_COLUMNS =
-  "id, created_at, title, slug, description, cover_url, category, published";
+  "id, created_at, updated_at, project_date, title, slug, description, cover_url, category, tags, lang, published";
 
 export type ProjectCard = Pick<
   Project,
   | "id"
   | "created_at"
+  | "updated_at"
+  | "project_date"
   | "title"
   | "slug"
   | "description"
   | "cover_url"
   | "category"
+  | "tags"
+  | "lang"
   | "published"
 >;
+
+/** The date readers see. */
+export function displayDate(project: Pick<Project, "project_date" | "created_at">): Date {
+  return new Date(project.project_date ?? project.created_at);
+}
 
 export interface Slide {
   id: string;

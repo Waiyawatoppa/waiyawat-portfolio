@@ -1,7 +1,21 @@
 "use client";
 
-import { useRef, useState, type ReactNode } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type ReactNode,
+} from "react";
 
+import {
+  clearDraft,
+  parseDraft,
+  readDraftRaw,
+  subscribeDrafts,
+  writeDraft,
+} from "@/lib/draft-storage";
+import { compressImage } from "@/lib/compress-image";
 import Markdown from "../_components/Markdown";
 import { uploadContentImage } from "./actions";
 
@@ -65,7 +79,7 @@ function BarButton({
       onClick={onClick}
       title={title}
       aria-label={title}
-      className="h-8 min-w-8 px-2 grid place-items-center rounded-lg text-sm text-gray-800 hover:bg-white hover:shadow-sm transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-700"
+      className="h-10 min-w-10 sm:h-8 sm:min-w-8 px-2 grid place-items-center rounded-lg text-sm text-ink-secondary hover:bg-surface hover:shadow-sm transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
     >
       {children}
     </button>
@@ -73,17 +87,26 @@ function BarButton({
 }
 
 const Divider = () => (
-  <span aria-hidden="true" className="w-px h-5 bg-gray-300 mx-1" />
+  <span aria-hidden="true" className="w-px h-5 bg-line-strong mx-1" />
 );
+
+const AUTOSAVE_DELAY_MS = 1000;
 
 export default function MarkdownEditor({
   name,
   defaultValue = "",
   rows = 18,
+  draftKey,
 }: {
   name: string;
   defaultValue?: string;
   rows?: number;
+  /**
+   * When set, the text is autosaved to localStorage under this key and a
+   * restore banner is offered if a newer draft is found on load. The parent
+   * clears it after a successful save.
+   */
+  draftKey?: string;
 }) {
   const areaRef = useRef<HTMLTextAreaElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -91,6 +114,43 @@ export default function MarkdownEditor({
   const [preview, setPreview] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [bannerDismissed, setBannerDismissed] = useState(false);
+
+  // Stored draft, read as an external store (server snapshot: none).
+  const draftRaw = useSyncExternalStore(
+    subscribeDrafts,
+    () => (draftKey ? readDraftRaw(draftKey) : null),
+    () => null,
+  );
+  const draft = parseDraft(draftRaw);
+  const showRestore =
+    Boolean(draftKey) &&
+    !bannerDismissed &&
+    draft !== null &&
+    draft.content !== defaultValue &&
+    draft.content !== value;
+
+  // Debounced autosave. An effect is the right tool here: it synchronises
+  // React state *out* to an external system, and does not set state itself.
+  useEffect(() => {
+    if (!draftKey) return;
+    if (value === defaultValue) return;
+    const timer = window.setTimeout(
+      () => writeDraft(draftKey, value),
+      AUTOSAVE_DELAY_MS,
+    );
+    return () => window.clearTimeout(timer);
+  }, [draftKey, value, defaultValue]);
+
+  function restoreDraft() {
+    if (draft) setValue(draft.content);
+    setBannerDismissed(true);
+  }
+
+  function discardDraft() {
+    if (draftKey) clearDraft(draftKey);
+    setBannerDismissed(true);
+  }
 
   /** Apply an edit and put the caret back where the writer expects it. */
   function apply(transform: (value: string, start: number, end: number) => Selection) {
@@ -134,7 +194,7 @@ export default function MarkdownEditor({
     setError(null);
     try {
       const formData = new FormData();
-      formData.append("file", file);
+      formData.append("file", await compressImage(file));
       const result = await uploadContentImage(formData);
 
       if (!result.ok) {
@@ -166,8 +226,45 @@ export default function MarkdownEditor({
   }
 
   return (
-    <div className="rounded-2xl border border-gray-200 overflow-hidden bg-white">
-      <div className="flex flex-wrap items-center gap-1 bg-gray-50 border-b border-gray-200 p-2">
+    <div className="rounded-2xl border border-line overflow-hidden bg-surface">
+      {showRestore && draft && (
+        <div
+          role="status"
+          className="flex flex-wrap items-center justify-between gap-3 bg-amber-50 border-b border-amber-200 px-4 py-3 text-sm text-amber-950"
+        >
+          <span>
+            <span className="font-bold">Unsaved draft found</span>
+            {draft.savedAt > 0 && (
+              <>
+                {" "}
+                from{" "}
+                <time dateTime={new Date(draft.savedAt).toISOString()}>
+                  {new Date(draft.savedAt).toLocaleString()}
+                </time>
+              </>
+            )}
+            .
+          </span>
+          <span className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={restoreDraft}
+              className="px-3 py-1.5 rounded-lg bg-amber-400 text-amber-950 text-xs font-bold hover:bg-amber-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+            >
+              Restore
+            </button>
+            <button
+              type="button"
+              onClick={discardDraft}
+              className="px-3 py-1.5 rounded-lg text-xs font-bold text-amber-950 hover:bg-amber-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+            >
+              Discard
+            </button>
+          </span>
+        </div>
+      )}
+
+      <div className="flex flex-wrap items-center gap-1 bg-surface-raised border-b border-line p-2">
         <BarButton onClick={() => wrap("**")} title="Bold (Ctrl+B)">
           <span className="font-black">B</span>
         </BarButton>
@@ -216,6 +313,14 @@ export default function MarkdownEditor({
         <BarButton onClick={() => insertBlock("---")} title="Divider">
           <span aria-hidden="true">―</span>
         </BarButton>
+        <BarButton
+          onClick={() =>
+            insertBlock("https://www.youtube.com/watch?v=VIDEO_ID")
+          }
+          title="YouTube video (paste the link on its own line)"
+        >
+          <span aria-hidden="true">▶</span>
+        </BarButton>
 
         <Divider />
 
@@ -233,13 +338,13 @@ export default function MarkdownEditor({
           className="hidden"
         />
 
-        <div className="ml-auto flex items-center gap-1">
+        <div className="ml-auto w-full sm:w-auto flex items-center justify-end gap-1 pt-1 sm:pt-0">
           <button
             type="button"
             onClick={() => setPreview(false)}
             aria-pressed={!preview}
-            className={`px-3 h-8 rounded-lg text-xs font-bold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-700 ${
-              preview ? "text-gray-700 hover:bg-white" : "bg-gray-900 text-white"
+            className={`px-3 h-8 rounded-lg text-xs font-bold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
+              preview ? "text-ink-secondary hover:bg-surface" : "bg-ink text-surface"
             }`}
           >
             Write
@@ -248,8 +353,8 @@ export default function MarkdownEditor({
             type="button"
             onClick={() => setPreview(true)}
             aria-pressed={preview}
-            className={`px-3 h-8 rounded-lg text-xs font-bold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-700 ${
-              preview ? "bg-gray-900 text-white" : "text-gray-700 hover:bg-white"
+            className={`px-3 h-8 rounded-lg text-xs font-bold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
+              preview ? "bg-ink text-surface" : "text-ink-secondary hover:bg-surface"
             }`}
           >
             Preview
@@ -264,34 +369,37 @@ export default function MarkdownEditor({
         id={name}
         name={name}
         value={value}
-        onChange={(event) => setValue(event.target.value)}
+        onChange={(event) => {
+          setValue(event.target.value);
+          setBannerDismissed(true);
+        }}
         onKeyDown={onKeyDown}
         rows={rows}
         required
         maxLength={50000}
         spellCheck
-        className={`w-full p-4 font-mono text-sm leading-relaxed outline-none resize-y focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sky-600 ${
+        className={`w-full p-4 font-mono text-sm leading-relaxed outline-none resize-y focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent ${
           preview ? "hidden" : "block"
         }`}
       />
 
       {preview && (
-        <div className="p-6 font-serif text-gray-700 break-words min-h-40">
+        <div className="p-6 font-serif text-ink-secondary break-words min-h-40">
           {value.trim() ? (
             <Markdown content={value} />
           ) : (
-            <p className="text-gray-500 italic font-sans text-sm">
+            <p className="text-ink-muted italic font-sans text-sm">
               Nothing to preview yet.
             </p>
           )}
         </div>
       )}
 
-      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-gray-200 bg-gray-50 px-4 py-2">
-        <p className="text-xs text-gray-600">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-line bg-surface-raised px-4 py-2">
+        <p className="text-xs text-ink-muted">
           Markdown supported. Select text, then use the toolbar.
         </p>
-        <p className="text-xs text-gray-600 tabular-nums">
+        <p className="text-xs text-ink-muted tabular-nums">
           {value.length.toLocaleString()} / 50,000
         </p>
       </div>

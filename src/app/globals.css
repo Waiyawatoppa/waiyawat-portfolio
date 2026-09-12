@@ -1,26 +1,94 @@
 @import "tailwindcss";
 
 /*
- * Light-only, declared explicitly.
+ * Semantic colour tokens.
  *
- * The previous file defined --background/--foreground ONLY inside a
- * prefers-color-scheme: dark block while body consumed them unconditionally.
- * In light mode both resolved to nothing; in OS dark mode the body colour
- * cascaded into form controls (Tailwind preflight sets `color: inherit`),
- * rendering the admin inputs as near-white text on a near-white field.
+ * Every token is defined completely on :root (light), then redefined for dark
+ * in two places so both paths win: the OS preference when the visitor has not
+ * chosen, and the explicit data-theme attribute when they have. A token is
+ * never defined only inside a media query — that was the original bug here,
+ * where --background existed solely under prefers-color-scheme: dark and
+ * light mode resolved to nothing.
  *
- * It also carried Tailwind v3 `@tailwind` directives alongside the v4 import,
- * and pointed --font-sans at --font-geist-sans, a variable nothing defines.
+ * Bright accent fills (sky-400 + sky-950 text, etc.) are deliberately not
+ * tokenised: they read correctly on both surfaces.
  */
 :root {
   color-scheme: light;
-  --background: #ffffff;
-  --foreground: #0a0a0a;
+
+  --surface: #ffffff;
+  --surface-raised: #f9fafb;
+  --surface-muted: #f3f4f6;
+
+  --ink: #0a0a0a;
+  --ink-secondary: #364153;
+  --ink-muted: #6a7282;
+
+  --line: #e5e7eb;
+  --line-strong: #d1d5dc;
+
+  --accent: #0069a8;        /* sky-700  */
+  --accent-strong: #00598a; /* sky-800  */
+  --accent-soft: #e0f2fe;   /* sky-100  */
+}
+
+/* Dark palette. Contrast against --surface: ink 17:1, secondary 11:1, muted 6:1. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+
+    --surface: #0b0e14;
+    --surface-raised: #141922;
+    --surface-muted: #1c2230;
+
+    --ink: #f3f4f6;
+    --ink-secondary: #c9d1dc;
+    --ink-muted: #8b95a5;
+
+    --line: #262d3a;
+    --line-strong: #364153;
+
+    --accent: #38bdf8;        /* sky-400 */
+    --accent-strong: #7dd3fc; /* sky-300 */
+    --accent-soft: #0c2a3d;
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --surface: #0b0e14;
+  --surface-raised: #141922;
+  --surface-muted: #1c2230;
+
+  --ink: #f3f4f6;
+  --ink-secondary: #c9d1dc;
+  --ink-muted: #8b95a5;
+
+  --line: #262d3a;
+  --line-strong: #364153;
+
+  --accent: #38bdf8;
+  --accent-strong: #7dd3fc;
+  --accent-soft: #0c2a3d;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-muted: var(--surface-muted);
+
+  --color-ink: var(--ink);
+  --color-ink-secondary: var(--ink-secondary);
+  --color-ink-muted: var(--ink-muted);
+
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-accent-soft: var(--accent-soft);
+
   --font-sans:
     var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI",
     sans-serif;
@@ -28,8 +96,8 @@
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--surface);
+  color: var(--ink);
 }
 
 /* ---------------------------------------------- tech stack marquee ------- */
@@ -78,18 +146,18 @@ body {
   cursor: pointer;
   font-size: 0.75rem;
   font-weight: 700;
-  color: var(--color-gray-700);
+  color: var(--ink-secondary);
   text-decoration: underline;
   text-underline-offset: 4px;
   border-radius: 0.25rem;
 }
 
 .marquee-toggle:hover {
-  color: var(--color-sky-800);
+  color: var(--accent);
 }
 
 .marquee-pause:focus-visible ~ .marquee-toggle {
-  outline: 2px solid var(--color-sky-700);
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 
@@ -117,5 +185,67 @@ body {
   /* Nothing is moving, so the pause control has nothing to control. */
   .marquee-toggle {
     display: none;
+  }
+}
+
+/* ---------------------------------------------------- reading polish ----- */
+
+/* Keeps the corner shortcut button from floating over an open dialog. */
+body[data-modal-open] .scroll-top {
+  display: none;
+}
+
+/* Nicer line breaks in prose where supported; harmless elsewhere. */
+article p {
+  text-wrap: pretty;
+}
+
+/* ------------------------------------------------------------- print ----- */
+
+@media print {
+  header,
+  footer,
+  nav:not([aria-label="More projects"]),
+  .scroll-top,
+  .reading-chrome,
+  .marquee,
+  .marquee-toggle {
+    display: none !important;
+  }
+
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  main {
+    padding-top: 0 !important;
+  }
+
+  article {
+    max-width: none !important;
+    color: #000 !important;
+  }
+
+  a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.8em;
+    color: #555;
+  }
+
+  h1,
+  h2,
+  h3,
+  img,
+  pre,
+  blockquote,
+  table {
+    break-inside: avoid;
+  }
+
+  h1,
+  h2,
+  h3 {
+    break-after: avoid;
   }
 }

@@ -1,12 +1,12 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { requireAdmin } from "@/lib/admin";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
-import { CATEGORIES, TIMELINE_KINDS } from "@/lib/types";
+import { SLUG_PATTERN } from "@/lib/slug";
+import { CATEGORIES, PROJECT_LANGS, TIMELINE_KINDS } from "@/lib/types";
 
 export type ActionState = { ok: boolean; message: string } | null;
 
@@ -40,15 +40,35 @@ const projectSchema = z.object({
   slug: z
     .string()
     .trim()
+    .toLowerCase()
     .min(1, "Slug is required")
     .max(120)
     .regex(
-      /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
-      "Slug must be lowercase letters, numbers and single hyphens",
+      SLUG_PATTERN,
+      "Slug must be letters, numbers and single hyphens",
     ),
   description: z.string().trim().min(1, "Description is required").max(500),
   content: z.string().trim().min(1, "Content is required").max(50_000),
   category: z.enum(CATEGORIES),
+  project_date: z.iso.date("Project date must be a valid date"),
+  lang: z.enum(PROJECT_LANGS),
+  tags: z
+    .string()
+    .transform((raw) =>
+      Array.from(
+        new Set(
+          raw
+            .split(",")
+            .map((tag) => tag.trim().toLowerCase())
+            .filter(Boolean),
+        ),
+      ),
+    )
+    .refine((tags) => tags.length <= 10, "Use at most 10 tags")
+    .refine(
+      (tags) => tags.every((tag) => tag.length <= 30),
+      "Each tag must be 30 characters or fewer",
+    ),
   github_url: externalUrl,
   live_url: externalUrl,
   pdf_url: externalUrl,
@@ -63,6 +83,9 @@ function parseProject(formData: FormData) {
     description: formData.get("description"),
     content: formData.get("content"),
     category: formData.get("category"),
+    project_date: formData.get("project_date"),
+    lang: formData.get("lang") ?? "en",
+    tags: formData.get("tags") ?? "",
     github_url: formData.get("github_url") ?? "",
     live_url: formData.get("live_url") ?? "",
     pdf_url: formData.get("pdf_url") ?? "",
@@ -123,6 +146,30 @@ async function uploadImage(
   if (error) throw new Error(`Image upload failed: ${error.message}`);
 
   return getSupabaseAdmin().storage.from(bucket).getPublicUrl(path).data.publicUrl;
+}
+
+/**
+ * Extracts object paths for every public URL in `text` that points at the
+ * given bucket on this project, so they can be passed to storage.remove().
+ * Plain string scanning rather than a dynamically built regex, so the base
+ * URL never needs escaping.
+ */
+function storagePathsIn(bucket: string, text: string): string[] {
+  const base = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!base) return [];
+
+  const prefix = `${base.replace(/\/$/, "")}/storage/v1/object/public/${bucket}/`;
+  const found = new Set<string>();
+
+  let index = text.indexOf(prefix);
+  while (index !== -1) {
+    const start = index + prefix.length;
+    const match = text.slice(start).match(/^[^\s)"'<>]+/);
+    if (match) found.add(decodeURIComponent(match[0]));
+    index = text.indexOf(prefix, start);
+  }
+
+  return Array.from(found);
 }
 
 function toMessage(error: unknown): string {
@@ -205,13 +252,11 @@ export async function updateProject(
     }
 
     revalidatePublic(project.slug);
+    revalidatePath(`/admin/edit/${id}`);
+    return { ok: true, message: "Saved" };
   } catch (error) {
     return { ok: false, message: toMessage(error) };
   }
-
-  // Outside the try block: redirect throws a control-flow signal that must not
-  // be swallowed by the catch above.
-  redirect("/admin");
 }
 
 export async function deleteProject(
@@ -224,8 +269,34 @@ export async function deleteProject(
     const id = String(formData.get("id") ?? "");
     if (!id) throw new Error("Missing project id");
 
-    const { error } = await getSupabaseAdmin().from("projects").delete().eq("id", id);
+    const admin = getSupabaseAdmin();
+
+    // Read before delete so the cover and any inline images can be removed
+    // from storage. Best-effort: a failed cleanup must not resurrect the row.
+    const { data: row } = await admin
+      .from("projects")
+      .select("cover_url, content")
+      .eq("id", id)
+      .maybeSingle();
+
+    const { error } = await admin.from("projects").delete().eq("id", id);
     if (error) throw new Error(error.message);
+
+    if (row) {
+      const paths = storagePathsIn(
+        "project-images",
+        `${row.cover_url ?? ""}
+${row.content ?? ""}`,
+      );
+      if (paths.length > 0) {
+        const { error: removeError } = await admin.storage
+          .from("project-images")
+          .remove(paths);
+        if (removeError) {
+          console.error("Orphaned images not removed:", removeError.message);
+        }
+      }
+    }
 
     revalidatePublic();
     return { ok: true, message: "Project deleted" };
@@ -336,6 +407,45 @@ export async function createTimelineEntry(
 
     revalidatePublic();
     return { ok: true, message: `Added "${parsed.data.title}"` };
+  } catch (error) {
+    return { ok: false, message: toMessage(error) };
+  }
+}
+
+export async function updateTimelineEntry(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  try {
+    await requireAdmin();
+
+    const id = String(formData.get("id") ?? "");
+    if (!id) throw new Error("Missing entry id");
+
+    const parsed = timelineSchema.safeParse({
+      title: formData.get("title"),
+      organization: formData.get("organization"),
+      period: formData.get("period"),
+      description: formData.get("description") ?? "",
+      kind: formData.get("kind"),
+      sort_order: formData.get("sort_order") || 0,
+    });
+
+    if (!parsed.success) {
+      throw new Error(
+        parsed.error.issues.map((issue) => issue.message).join(". "),
+      );
+    }
+
+    const { description, ...rest } = parsed.data;
+    const { error } = await getSupabaseAdmin()
+      .from("timeline_entries")
+      .update({ ...rest, description: description || null })
+      .eq("id", id);
+    if (error) throw new Error(error.message);
+
+    revalidatePublic();
+    return { ok: true, message: "Saved" };
   } catch (error) {
     return { ok: false, message: toMessage(error) };
   }

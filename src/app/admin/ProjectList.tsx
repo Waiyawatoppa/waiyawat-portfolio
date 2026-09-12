@@ -9,7 +9,7 @@ import { deleteProject, togglePublished, type ActionState } from "./actions";
 
 export type ProjectRow = Pick<
   Project,
-  "id" | "title" | "slug" | "category" | "published" | "created_at"
+  "id" | "title" | "slug" | "category" | "published" | "created_at" | "project_date"
 >;
 
 type Filter = "all" | "published" | "draft";
@@ -40,7 +40,7 @@ function PublishToggle({ project }: { project: ProjectRow }) {
         title={
           project.published ? "Move back to drafts" : "Publish to the live site"
         }
-        className="text-xs font-bold text-gray-700 hover:text-sky-800 transition p-2 hover:bg-sky-50 rounded-lg disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-700"
+        className="text-xs font-bold text-ink-secondary hover:text-accent-strong transition p-2 hover:bg-accent-soft rounded-lg disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
       >
         {pending ? "…" : project.published ? "Unpublish" : "Publish"}
         <span className="sr-only"> {project.title}</span>
@@ -75,11 +75,11 @@ export default function ProjectList({ projects }: { projects: ProjectRow[] }) {
   const draftCount = projects.filter((p) => !p.published).length;
 
   return (
-    <section className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
+    <section className="bg-surface rounded-3xl p-8 shadow-sm border border-line">
       <div className="flex flex-wrap items-end justify-between gap-4 mb-6">
         <div>
           <h2 className="text-xl font-bold">Existing Projects</h2>
-          <p className="text-xs text-gray-600">
+          <p className="text-xs text-ink-muted">
             {projects.length} total
             {draftCount > 0 && ` · ${draftCount} draft${draftCount > 1 ? "s" : ""}`}
           </p>
@@ -95,7 +95,7 @@ export default function ProjectList({ projects }: { projects: ProjectRow[] }) {
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search title, slug or category"
-            className="p-2 px-3 w-56 bg-gray-50 rounded-xl border border-transparent text-sm outline-none focus-visible:ring-2 focus-visible:ring-sky-600"
+            className="p-2 px-3 w-56 bg-surface-raised rounded-xl border border-transparent text-sm outline-none focus-visible:ring-2 focus-visible:ring-accent"
           />
 
           <div role="group" aria-label="Filter by status" className="flex gap-1">
@@ -105,10 +105,10 @@ export default function ProjectList({ projects }: { projects: ProjectRow[] }) {
                 type="button"
                 onClick={() => setFilter(option.value)}
                 aria-pressed={filter === option.value}
-                className={`px-3 py-2 rounded-xl text-xs font-bold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-700 ${
+                className={`px-3 py-2 rounded-xl text-xs font-bold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
                   filter === option.value
-                    ? "bg-gray-900 text-white"
-                    : "bg-gray-100 text-gray-800 hover:bg-gray-200"
+                    ? "bg-ink text-surface"
+                    : "bg-surface-muted text-ink-secondary hover:bg-surface-muted"
                 }`}
               >
                 {option.label}
@@ -124,12 +124,12 @@ export default function ProjectList({ projects }: { projects: ProjectRow[] }) {
             key={project.id}
             className={`flex flex-wrap items-center justify-between gap-4 p-4 border rounded-2xl ${
               project.published
-                ? "border-gray-200"
+                ? "border-line"
                 : "border-dashed border-amber-300 bg-amber-50/40"
             }`}
           >
             <div className="min-w-0">
-              <p className="font-bold text-gray-900 truncate flex items-center gap-2">
+              <p className="font-bold text-ink truncate flex items-center gap-2">
                 {project.title}
                 {!project.published && (
                   <span className="text-[10px] font-black uppercase tracking-widest bg-amber-400 text-amber-950 px-2 py-0.5 rounded-full shrink-0">
@@ -137,13 +137,13 @@ export default function ProjectList({ projects }: { projects: ProjectRow[] }) {
                   </span>
                 )}
               </p>
-              <p className="text-xs text-gray-600 truncate">
+              <p className="text-xs text-ink-muted truncate">
                 /project/{project.slug}
               </p>
             </div>
 
             <div className="flex items-center gap-4">
-              <span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded-full uppercase font-bold tracking-wide">
+              <span className="text-xs bg-surface-muted text-ink-secondary px-2 py-1 rounded-full uppercase font-bold tracking-wide">
                 {project.category}
               </span>
               <div className="flex items-center gap-1">
@@ -152,7 +152,7 @@ export default function ProjectList({ projects }: { projects: ProjectRow[] }) {
                     href={`/project/${project.slug}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-xs font-bold text-gray-700 hover:text-sky-800 transition p-2 hover:bg-sky-50 rounded-lg"
+                    className="text-xs font-bold text-ink-secondary hover:text-accent-strong transition p-2 hover:bg-accent-soft rounded-lg"
                   >
                     View
                     <span className="sr-only">
@@ -164,7 +164,7 @@ export default function ProjectList({ projects }: { projects: ProjectRow[] }) {
                 <PublishToggle project={project} />
                 <Link
                   href={`/admin/edit/${project.id}`}
-                  className="text-xs font-bold text-gray-700 hover:text-sky-800 transition p-2 hover:bg-sky-50 rounded-lg"
+                  className="text-xs font-bold text-ink-secondary hover:text-accent-strong transition p-2 hover:bg-accent-soft rounded-lg"
                 >
                   Edit
                   <span className="sr-only"> {project.title}</span>
@@ -181,7 +181,7 @@ export default function ProjectList({ projects }: { projects: ProjectRow[] }) {
       </ul>
 
       {visible.length === 0 && (
-        <p className="text-center py-10 text-gray-600 text-sm">
+        <p className="text-center py-10 text-ink-muted text-sm">
           {projects.length === 0
             ? "No projects yet. Add your first one above."
             : "No projects match this search."}

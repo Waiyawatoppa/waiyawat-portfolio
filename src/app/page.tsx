@@ -25,7 +25,7 @@ function navLinks(hasJourney: boolean): NavLink[] {
   ];
 }
 
-const EYEBROW = "text-xs uppercase tracking-[0.3em] font-bold text-gray-500";
+const EYEBROW = "text-xs uppercase tracking-[0.3em] font-bold text-ink-muted";
 
 export default async function Home() {
   const [projects, slides, timeline] = await Promise.all([
@@ -38,7 +38,7 @@ export default async function Home() {
     <>
       <SiteNav links={navLinks(timeline.length > 0)} />
 
-      <main id="main" className="bg-white min-h-dvh">
+      <main id="main" className="bg-surface min-h-dvh">
         <section className="pt-36 pb-20 px-6">
           <div className="max-w-6xl mx-auto text-center">
             <h1 className="text-4xl md:text-6xl font-bold mb-6 tracking-tight leading-tight max-w-4xl mx-auto">
@@ -48,7 +48,7 @@ export default async function Home() {
               </span>{" "}
               with Technology.
             </h1>
-            <p className="text-lg text-gray-500 max-w-2xl mx-auto mb-10 leading-relaxed">
+            <p className="text-lg text-ink-muted max-w-2xl mx-auto mb-10 leading-relaxed">
               {site.name} — {site.role}. Focused on building tech solutions for
               positive social impact.
             </p>
@@ -62,7 +62,7 @@ export default async function Home() {
         <section
           id="about"
           aria-labelledby="about-heading"
-          className="max-w-6xl mx-auto px-6 py-16 mb-10 border-t border-gray-100 scroll-mt-24"
+          className="max-w-6xl mx-auto px-6 py-16 mb-10 border-t border-line scroll-mt-24"
         >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-20 items-center">
             <div className="w-full">
@@ -73,17 +73,17 @@ export default async function Home() {
               <p className={`${EYEBROW} mb-4`}>About Me</p>
               <h2
                 id="about-heading"
-                className="text-3xl lg:text-4xl font-bold text-gray-900 mb-6 leading-tight"
+                className="text-3xl lg:text-4xl font-bold text-ink mb-6 leading-tight"
               >
                 Technology Creating{" "}
                 <span className="text-sky-600">Positive Impact</span> for{" "}
                 <span className="text-pink-600">Business and Society</span>.
               </h2>
 
-              <div className="space-y-5 text-gray-700 leading-relaxed text-base">
+              <div className="space-y-5 text-ink-secondary leading-relaxed text-base">
                 <p>
                   Hi, I&rsquo;m{" "}
-                  <span className="font-semibold text-gray-900">
+                  <span className="font-semibold text-ink">
                     {site.shortName}
                   </span>
                   , a Computer Science student at Kasetsart University. With a
@@ -95,7 +95,7 @@ export default async function Home() {
                   I am committed to continuous self-improvement, balancing my
                   expertise across technology, engineering and business. I
                   believe I can be a{" "}
-                  <span className="font-semibold text-gray-900">
+                  <span className="font-semibold text-ink">
                     key piece of the puzzle
                   </span>{" "}
                   for modern enterprises, driving them forward with stability
@@ -106,7 +106,7 @@ export default async function Home() {
                   Thank you for visiting my profile. I look forward to the
                   possibility of collaborating with you in the future.
                 </p>
-                <p className="font-bold text-gray-900 pt-2">{site.name}</p>
+                <p className="font-bold text-ink pt-2">{site.name}</p>
               </div>
 
               {site.cv && (
@@ -115,7 +115,7 @@ export default async function Home() {
                     href={site.cv}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-block px-8 py-3 bg-gray-900 text-white rounded-full text-sm font-bold hover:bg-sky-700 transition shadow-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-700"
+                    className="inline-block px-8 py-3 bg-ink text-surface rounded-full text-sm font-bold hover:bg-sky-700 transition shadow-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
                   >
                     View my CV
                     <span className="sr-only">
@@ -147,17 +147,17 @@ export default async function Home() {
         <section
           id="contact"
           aria-labelledby="contact-heading"
-          className="max-w-6xl mx-auto px-6 py-20 border-t border-gray-100 scroll-mt-24"
+          className="max-w-6xl mx-auto px-6 py-20 border-t border-line scroll-mt-24"
         >
           <div className="max-w-2xl mx-auto text-center">
             <p className={`${EYEBROW} mb-4`}>Contact</p>
             <h2
               id="contact-heading"
-              className="text-3xl lg:text-4xl font-bold text-gray-900 mb-6 leading-tight"
+              className="text-3xl lg:text-4xl font-bold text-ink mb-6 leading-tight"
             >
               Let&rsquo;s build something worth building.
             </h2>
-            <p className="text-gray-700 leading-relaxed mb-10">
+            <p className="text-ink-secondary leading-relaxed mb-10">
               I&rsquo;m open to internships, collaborations and conversations
               about technology, business and social impact. The fastest way to
               reach me is email.
@@ -166,7 +166,7 @@ export default async function Home() {
             <div className="flex flex-wrap justify-center gap-4">
               <a
                 href={mailto}
-                className="px-8 py-3 bg-gray-900 text-white rounded-full text-sm font-bold hover:bg-sky-700 transition shadow-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-700"
+                className="px-8 py-3 bg-ink text-surface rounded-full text-sm font-bold hover:bg-sky-700 transition shadow-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
               >
                 {site.email}
               </a>
@@ -174,7 +174,7 @@ export default async function Home() {
                 href={site.github}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-8 py-3 border border-gray-300 rounded-full text-sm font-bold text-gray-900 hover:bg-gray-50 transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-700"
+                className="px-8 py-3 border border-line-strong rounded-full text-sm font-bold text-ink hover:bg-surface-raised transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
               >
                 GitHub
                 <span className="sr-only"> (opens in a new tab)</span>
@@ -184,7 +184,7 @@ export default async function Home() {
                   href={site.linkedin}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-8 py-3 border border-gray-300 rounded-full text-sm font-bold text-gray-900 hover:bg-gray-50 transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-700"
+                  className="px-8 py-3 border border-line-strong rounded-full text-sm font-bold text-ink hover:bg-surface-raised transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
                 >
                   LinkedIn
                   <span className="sr-only"> (opens in a new tab)</span>
