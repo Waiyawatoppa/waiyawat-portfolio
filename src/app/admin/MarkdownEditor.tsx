@@ -97,6 +97,8 @@ export default function MarkdownEditor({
   defaultValue = "",
   rows = 18,
   draftKey,
+  draftExtra,
+  onRestoreExtra,
 }: {
   name: string;
   defaultValue?: string;
@@ -107,6 +109,10 @@ export default function MarkdownEditor({
    * clears it after a successful save.
    */
   draftKey?: string;
+  /** Small string fields the parent wants saved with the draft (e.g. cover URL). */
+  draftExtra?: Record<string, string>;
+  /** Called with the saved extra fields when the author restores a draft. */
+  onRestoreExtra?: (extra: Record<string, string>) => void;
 }) {
   const areaRef = useRef<HTMLTextAreaElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -123,27 +129,40 @@ export default function MarkdownEditor({
     () => null,
   );
   const draft = parseDraft(draftRaw);
+  const extraKey = JSON.stringify(draftExtra ?? {});
+  // What the extra fields looked like when the editor mounted, so an
+  // unchanged form is never autosaved as if it were a draft.
+  const initialExtraKey = useRef(extraKey);
+  const draftDiffers =
+    draft !== null &&
+    (draft.content !== defaultValue ||
+      JSON.stringify(draft.extra) !== extraKey);
   const showRestore =
     Boolean(draftKey) &&
     !bannerDismissed &&
+    draftDiffers &&
     draft !== null &&
-    draft.content !== defaultValue &&
     draft.content !== value;
 
   // Debounced autosave. An effect is the right tool here: it synchronises
   // React state *out* to an external system, and does not set state itself.
   useEffect(() => {
     if (!draftKey) return;
-    if (value === defaultValue) return;
+    if (value === defaultValue && extraKey === initialExtraKey.current) return;
     const timer = window.setTimeout(
-      () => writeDraft(draftKey, value),
+      () => writeDraft(draftKey, value, draftExtra ?? {}),
       AUTOSAVE_DELAY_MS,
     );
     return () => window.clearTimeout(timer);
-  }, [draftKey, value, defaultValue]);
+    // extraKey is the stable serialisation of draftExtra.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [draftKey, value, defaultValue, extraKey]);
 
   function restoreDraft() {
-    if (draft) setValue(draft.content);
+    if (draft) {
+      setValue(draft.content);
+      onRestoreExtra?.(draft.extra);
+    }
     setBannerDismissed(true);
   }
 

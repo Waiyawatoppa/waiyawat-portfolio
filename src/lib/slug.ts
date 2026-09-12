@@ -26,3 +26,21 @@ export function slugifyTitle(title: string): string {
 
 /** What the server accepts. Mirrors the zod regex in admin/actions.ts. */
 export const SLUG_PATTERN = /^[\p{L}\p{N}\p{M}]+(?:-[\p{L}\p{N}\p{M}]+)*$/u;
+
+/**
+ * Normalises a slug taken from a route param before a database lookup.
+ *
+ * Next does not guarantee that dynamic params arrive percent-decoded, and
+ * slugs may now contain Thai, so "%E0%B8%A3…" and "ระบบ…" must resolve to the
+ * same row. Decoding an already-decoded value is a no-op, so this is safe to
+ * apply unconditionally; a malformed sequence falls back to the raw value.
+ */
+export function normalizeSlugParam(raw: string): string {
+  let value = raw;
+  try {
+    value = decodeURIComponent(raw);
+  } catch {
+    /* keep raw */
+  }
+  return value.trim().toLowerCase();
+}

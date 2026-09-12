@@ -4,9 +4,9 @@ import ProjectDetail from "@/app/_components/ProjectDetail";
 
 const TITLE_ID = "project-modal-title";
 
-// Cached like the full page. revalidatePublic() in the admin actions
-// invalidates /project/[slug], which covers this intercepted route too.
-export const revalidate = 3600;
+// Deliberately dynamic. Caching an intercepted parallel-route segment meant a
+// "not found" result (e.g. opened while still a draft) could be served for an
+// hour after publishing. The full page at /project/[slug] carries the ISR.
 
 /**
  * Intercepting route for soft navigations from the project grid.
@@ -21,8 +21,25 @@ export default async function ProjectModal(props: {
   const { slug } = await props.params;
   const project = await getProjectBySlug(slug);
 
-  // Fall through to the full route rather than showing an empty dialog.
-  if (!project) return null;
+  // Say so rather than rendering nothing: an empty slot leaves the visitor on
+  // the homepage with a /project URL and no idea what happened.
+  if (!project) {
+    return (
+      <Modal titleId={TITLE_ID}>
+        <div className="max-w-xl mx-auto px-6 py-20 text-center">
+          <p className="text-xs uppercase tracking-[0.3em] font-bold text-ink-muted mb-4">
+            Not found
+          </p>
+          <h2 id={TITLE_ID} className="text-3xl font-bold text-ink mb-4">
+            This project isn&rsquo;t available.
+          </h2>
+          <p className="text-ink-secondary">
+            It may be unpublished or the link may be out of date.
+          </p>
+        </div>
+      </Modal>
+    );
+  }
 
   const { previous, next } = await getAdjacentProjects(project);
 

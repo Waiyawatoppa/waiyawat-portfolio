@@ -8,7 +8,12 @@ import { getSupabaseAdmin } from "@/lib/supabase-admin";
 import { SLUG_PATTERN } from "@/lib/slug";
 import { CATEGORIES, PROJECT_LANGS, TIMELINE_KINDS } from "@/lib/types";
 
-export type ActionState = { ok: boolean; message: string } | null;
+export type ActionState = {
+  ok: boolean;
+  message: string;
+  /** Set by createProject so the form can move to the edit page. */
+  id?: string;
+} | null;
 
 /* ---------------------------------------------------------------- validation */
 
@@ -179,7 +184,15 @@ function toMessage(error: unknown): string {
 function revalidatePublic(slug?: string) {
   revalidatePath("/");
   revalidatePath("/admin");
-  if (slug) revalidatePath(`/project/${slug}`);
+  revalidatePath("/sitemap.xml");
+  revalidatePath("/feed.xml");
+  if (slug) {
+    revalidatePath(`/project/${slug}`);
+    revalidatePath(`/project/${encodeURIComponent(slug)}`);
+  }
+  // Layout-level flush of every project page: covers renames, duplicates
+  // and any encoding mismatch between the stored slug and the request path.
+  revalidatePath("/project/[slug]", "page");
 }
 
 /* ------------------------------------------------------------------ projects */
@@ -192,15 +205,19 @@ export async function createProject(
     await requireAdmin();
     const project = parseProject(formData);
 
+    // Normal path: the form uploaded the cover on selection and sends its URL.
+    // Fallback (JS off): a raw file arrives and is uploaded here instead.
+    let coverUrl = String(formData.get("cover_url") ?? "");
     const file = formData.get("image_file");
-    let coverUrl = "";
     if (file instanceof File && file.size > 0) {
       coverUrl = await uploadImage("project-images", "covers", file);
     }
 
-    const { error } = await getSupabaseAdmin()
+    const { data, error } = await getSupabaseAdmin()
       .from("projects")
-      .insert([{ ...project, cover_url: coverUrl }]);
+      .insert([{ ...project, cover_url: coverUrl }])
+      .select("id")
+      .single();
 
     if (error) {
       throw new Error(
@@ -211,7 +228,13 @@ export async function createProject(
     }
 
     revalidatePublic(project.slug);
-    return { ok: true, message: `Published "${project.title}"` };
+    return {
+      ok: true,
+      id: data.id as string,
+      message: project.published
+        ? `Published "${project.title}"`
+        : `Saved "${project.title}" as a draft`,
+    };
   } catch (error) {
     return { ok: false, message: toMessage(error) };
   }
@@ -500,6 +523,29 @@ export async function uploadContentImage(
   }
 }
 
+/**
+ * Uploads a cover as soon as it is chosen, so the URL can live in the form and
+ * in the autosaved draft. Without this, a cover picked before a reload was
+ * simply gone: browsers never restore <input type="file">.
+ */
+export async function uploadCoverImage(
+  formData: FormData,
+): Promise<{ ok: true; url: string } | { ok: false; message: string }> {
+  try {
+    await requireAdmin();
+
+    const file = formData.get("file");
+    if (!(file instanceof File) || file.size === 0) {
+      throw new Error("Choose an image to upload");
+    }
+
+    const url = await uploadImage("project-images", "covers", file);
+    return { ok: true, url };
+  } catch (error) {
+    return { ok: false, message: toMessage(error) };
+  }
+}
+
 /** Flip a project between draft and published from the dashboard list. */
 export async function togglePublished(
   _prev: ActionState,
@@ -512,13 +558,17 @@ export async function togglePublished(
     if (!id) throw new Error("Missing project id");
     const next = formData.get("next") === "true";
 
-    const { error } = await getSupabaseAdmin()
+    const { data, error } = await getSupabaseAdmin()
       .from("projects")
       .update({ published: next })
-      .eq("id", id);
+      .eq("id", id)
+      .select("slug")
+      .maybeSingle();
     if (error) throw new Error(error.message);
 
-    revalidatePublic();
+    // The project's own page must be invalidated too: a 404 cached while it
+    // was a draft would otherwise persist for the full revalidate window.
+    revalidatePublic(data?.slug ?? undefined);
     return { ok: true, message: next ? "Published" : "Moved to drafts" };
   } catch (error) {
     return { ok: false, message: toMessage(error) };

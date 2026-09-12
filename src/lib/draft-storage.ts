@@ -7,7 +7,12 @@
  * event only fires in *other* tabs.
  */
 
-export type Draft = { content: string; savedAt: number };
+export type Draft = {
+  content: string;
+  /** Small string fields saved with the text, e.g. an already-uploaded cover URL. */
+  extra: Record<string, string>;
+  savedAt: number;
+};
 
 const PREFIX = "draft:";
 const listeners = new Set<() => void>();
@@ -46,8 +51,15 @@ export function parseDraft(raw: string | null): Draft | null {
   try {
     const parsed = JSON.parse(raw) as Partial<Draft>;
     if (typeof parsed.content !== "string") return null;
+    const extra: Record<string, string> = {};
+    if (parsed.extra && typeof parsed.extra === "object") {
+      for (const [key, value] of Object.entries(parsed.extra)) {
+        if (typeof value === "string") extra[key] = value;
+      }
+    }
     return {
       content: parsed.content,
+      extra,
       savedAt: typeof parsed.savedAt === "number" ? parsed.savedAt : 0,
     };
   } catch {
@@ -55,9 +67,13 @@ export function parseDraft(raw: string | null): Draft | null {
   }
 }
 
-export function writeDraft(id: string, content: string): void {
+export function writeDraft(
+  id: string,
+  content: string,
+  extra: Record<string, string> = {},
+): void {
   try {
-    const draft: Draft = { content, savedAt: Date.now() };
+    const draft: Draft = { content, extra, savedAt: Date.now() };
     window.localStorage.setItem(key(id), JSON.stringify(draft));
   } catch {
     /* storage unavailable — autosave simply does not happen */
