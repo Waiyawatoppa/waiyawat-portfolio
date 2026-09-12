@@ -1,3 +1,4 @@
+import { normalizeSlugParam } from "./slug";
 import { supabase } from "./supabase";
 import {
   PROJECT_CARD_COLUMNS,
@@ -35,19 +36,28 @@ export async function getProjectCards(): Promise<ProjectCard[]> {
  * Public lookup: drafts resolve to null so an unfinished case study 404s rather
  * than leaking. The admin edit page reads by id instead and is not affected.
  */
-export async function getProjectBySlug(slug: string): Promise<Project | null> {
+export async function getProjectBySlug(rawSlug: string): Promise<Project | null> {
+  const slug = normalizeSlugParam(rawSlug);
+
+  // limit(1) rather than maybeSingle(): maybeSingle() returns an error when
+  // more than one row matches, which would turn an accidental duplicate slug
+  // into an invisible project instead of showing one of them.
   const { data, error } = await supabase
     .from("projects")
     .select("*")
     .eq("slug", slug)
     .eq("published", true)
-    .maybeSingle();
+    .limit(1);
 
   if (error) {
     console.error(`Failed to load project "${slug}":`, error.message);
     return null;
   }
-  return (data as Project) ?? null;
+  const project = (data?.[0] as Project | undefined) ?? null;
+  if (!project) {
+    console.warn(`No published project for slug "${slug}" (raw param: "${rawSlug}")`);
+  }
+  return project;
 }
 
 export type ProjectIndexRow = Pick<
